@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
+
 import { getSeasonNote } from '@/lib/ai/season'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
+
 
 function fmtDate(iso: string) {
   try {
@@ -84,7 +86,7 @@ RULES:
   )
 
   try {
-    const completion = await groq.chat.completions.create({
+    const completion = await getGroq().chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: systemPrompt },

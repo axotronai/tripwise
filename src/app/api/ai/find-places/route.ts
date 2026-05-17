@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
+
 import { getSeasonNote } from '@/lib/ai/season'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
+
 
 export async function POST(req: NextRequest) {
   const { city, destination, travel_style, start_date, category, exclude = [] } = await req.json()
@@ -58,7 +60,7 @@ Rules:
 
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const completion = await groq.chat.completions.create({
+      const completion = await getGroq().chat.completions.create({
         model: 'llama-3.3-70b-versatile',
         messages: [{ role: 'user', content: prompt }],
         temperature: attempt === 0 ? baseTemp : 0.5,

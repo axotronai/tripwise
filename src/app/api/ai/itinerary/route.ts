@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
+
 import { getSeasonNote } from '@/lib/ai/season'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
+
 
 export async function POST(req: NextRequest) {
   const {
@@ -154,7 +156,7 @@ STRICT RULES:
   const maxRetries = 2
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const completion = await groq.chat.completions.create({
+      const completion = await getGroq().chat.completions.create({
         model:           'llama-3.3-70b-versatile',
         messages:        [{ role: 'user', content: prompt }],
         temperature:     attempt === 0 ? 0.7 : 0.4,
