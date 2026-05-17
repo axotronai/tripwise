@@ -16,7 +16,6 @@ export function generateDays(startDate: string, endDate: string, destination: st
 }
 
 export function calcBudgetBreakdown(totalBudget: number, style: TravelStyle, days: number, groupSize: number): BudgetBreakdown {
-  const perPerson = totalBudget / groupSize
   const allocations = {
     budget: { transport: 0.25, hotels: 0.30, food: 0.25, activities: 0.10, buffer: 0.10 },
     comfort: { transport: 0.25, hotels: 0.35, food: 0.20, activities: 0.12, buffer: 0.08 },

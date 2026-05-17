@@ -12,6 +12,7 @@ create table if not exists public.trips (
   total_budget numeric not null default 0,
   travel_style text not null default 'comfort',
   group_size int not null default 1,
+  children int not null default 0,
   created_at timestamptz default now()
 );
 
@@ -86,14 +87,22 @@ alter table public.transports enable row level security;
 alter table public.hotels enable row level security;
 alter table public.expenses enable row level security;
 
--- Policies
-create policy "Users own their trips" on public.trips for all using (auth.uid() = user_id);
-create policy "Users own their days" on public.itinerary_days for all using (
-  exists (select 1 from public.trips where id = trip_id and user_id = auth.uid())
+-- Trips: anyone can read (for sharing), only owner can write
+create policy "Public read trips" on public.trips for select using (true);
+create policy "Users manage their trips" on public.trips for all using (auth.uid() = user_id or user_id = '00000000-0000-0000-0000-000000000000'::uuid);
+
+-- Days: public read, owner write
+create policy "Public read days" on public.itinerary_days for select using (true);
+create policy "Users manage their days" on public.itinerary_days for all using (
+  exists (select 1 from public.trips where id = trip_id and (user_id = auth.uid() or user_id = '00000000-0000-0000-0000-000000000000'::uuid))
 );
-create policy "Users own their activities" on public.activities for all using (
-  exists (select 1 from public.itinerary_days d join public.trips t on t.id = d.trip_id where d.id = day_id and t.user_id = auth.uid())
+
+-- Activities: public read, owner write
+create policy "Public read activities" on public.activities for select using (true);
+create policy "Users manage their activities" on public.activities for all using (
+  exists (select 1 from public.itinerary_days d join public.trips t on t.id = d.trip_id where d.id = day_id and (t.user_id = auth.uid() or t.user_id = '00000000-0000-0000-0000-000000000000'::uuid))
 );
+
 create policy "Users own their transports" on public.transports for all using (
   exists (select 1 from public.trips where id = trip_id and user_id = auth.uid())
 );

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#2563eb"/>
+  <!-- Map pin body -->
+  <path d="M256 120 C206 120 166 160 166 210 C166 270 256 390 256 390 C256 390 346 270 346 210 C346 160 306 120 256 120Z" fill="white" opacity="0.95"/>
+  <!-- Map pin hole -->
+  <circle cx="256" cy="210" r="32" fill="#2563eb"/>
+  <!-- Sparkle top-right -->
+  <path d="M330 115 L335 100 L340 115 L355 120 L340 125 L335 140 L330 125 L315 120Z" fill="white" opacity="0.85"/>
+  <!-- Sparkle small -->
+  <path d="M355 160 L358 152 L361 160 L369 163 L361 166 L358 174 L355 166 L347 163Z" fill="white" opacity="0.6"/>
+</svg>

@@ -1,0 +1,577 @@
+{
+  "goa": {
+    "name": "Goa",
+    "emoji": "🏖️",
+    "tagline": "Sun, Sand & Sea",
+    "gradient": "from-cyan-500 to-blue-600",
+    "type": "Beach",
+    "rating": 4.8,
+    "reviews": "12.4k",
+    "duration": "4–6 days",
+    "budget": "₹8,000–₹25,000",
+    "photo": "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80",
+    "description": "Goa is India's smallest state and its most famous beach destination. With 100+ km of coastline, Portuguese colonial heritage, a vibrant nightlife scene, and some of India's best seafood, it's the go-to getaway for every kind of traveller — from backpackers crashing at beach shacks to honeymooners in luxury resorts.",
+    "highlights": [
+      { "icon": "🌊", "title": "Stunning Beaches", "desc": "North Goa has lively beaches like Baga, Calangute, and Anjuna. South Goa has serene hidden coves — Palolem, Agonda, and Butterfly Beach." },
+      { "icon": "🏛️", "title": "Portuguese Heritage", "desc": "Old Goa's Basilica of Bom Jesus and Se Cathedral are UNESCO World Heritage sites dating back 400 years." },
+      { "icon": "🍹", "title": "Food & Nightlife", "desc": "From beach shacks serving fish curry rice to rooftop bars and night markets — Goa's food and party scene is unmatched." },
+      { "icon": "🛶", "title": "Dudhsagar Falls", "desc": "One of India's tallest waterfalls hidden inside a jungle — reachable by jeep safari or a scenic train ride." }
+    ],
+    "thingsToDo": [
+      { "emoji": "🤿", "name": "Water Sports" },
+      { "emoji": "🛵", "name": "Scooter Rides" },
+      { "emoji": "🐬", "name": "Dolphin Tour" },
+      { "emoji": "🍢", "name": "Beach Shack Food" },
+      { "emoji": "🎉", "name": "Night Markets" },
+      { "emoji": "⛪", "name": "Church Trail" },
+      { "emoji": "🌅", "name": "Sunset Cruise" },
+      { "emoji": "🏄", "name": "Surfing" }
+    ],
+    "bestTime": "November to February — perfect weather, clear skies, beach season at its best. Avoid June–September (monsoon — beaches close).",
+    "howToReach": [
+      { "mode": "Flight", "detail": "Dabolim Airport (GOI) — direct flights from Delhi, Mumbai, Bangalore, Hyderabad.", "icon": "✈️" },
+      { "mode": "Train", "detail": "Madgaon (MAO) or Thivim station — Rajdhani, Konkan Railway from major cities.", "icon": "🚂" },
+      { "mode": "Bus", "detail": "Overnight Volvo buses from Mumbai (~8 hrs), Bangalore (~14 hrs).", "icon": "🚌" }
+    ],
+    "lat": 15.2993,
+    "lon": 74.1240,
+    "emergency": {
+      "police": "100",
+      "ambulance": "108",
+      "tourist": "1800-111-363",
+      "hospital": "Goa Medical College: 0832-2458700"
+    },
+    "festivals": [
+      { "name": "Goa Carnival", "month": "Feb/Mar", "desc": "Colorful Portuguese-heritage street festival" },
+      { "name": "Sunburn Festival", "month": "Dec", "desc": "Asia's largest EDM music festival" },
+      { "name": "Goa Food & Cultural Festival", "month": "Nov", "desc": "Beachside food and culture celebration" }
+    ]
+  },
+  "manali": {
+    "name": "Manali",
+    "emoji": "🏔️",
+    "tagline": "The Adventure Capital of India",
+    "gradient": "from-blue-500 to-indigo-700",
+    "type": "Mountains",
+    "rating": 4.7,
+    "reviews": "9.1k",
+    "duration": "5–7 days",
+    "budget": "₹10,000–₹30,000",
+    "photo": "",
+    "description": "Nestled at 2,050m in the Beas River valley, Manali is the crown of Himachal Pradesh. Famous for snow-capped peaks, apple orchards, adventure sports, and the gateway to Leh-Ladakh via Rohtang Pass, it draws everyone from honeymooners to trekkers to bikers.",
+    "highlights": [
+      { "icon": "🏔️", "title": "Rohtang Pass", "desc": "At 3,978m, Rohtang offers snow even in summer. Drive or snowmobile across the world-famous pass — gateway to Spiti and Lahaul." },
+      { "icon": "⛷️", "title": "Adventure Sports", "desc": "Skiing at Solang Valley in winter, paragliding, river rafting on Beas, and trekking to Hampta Pass." },
+      { "icon": "🛕", "title": "Hadimba Temple", "desc": "Ancient wooden temple dedicated to Goddess Hadimba, surrounded by a cedar forest — a stunning piece of Kullu architecture." },
+      { "icon": "🍎", "title": "Old Manali", "desc": "The charming backpacker village with cafes, apple orchards, and the Manu Temple — great for slow travel." }
+    ],
+    "thingsToDo": [
+      { "emoji": "⛷️", "name": "Skiing" },
+      { "emoji": "🪂", "name": "Paragliding" },
+      { "emoji": "🏕️", "name": "Camping" },
+      { "emoji": "🚵", "name": "Mountain Biking" },
+      { "emoji": "🥾", "name": "Trekking" },
+      { "emoji": "🛷", "name": "Snow Activities" },
+      { "emoji": "🍏", "name": "Apple Picking" },
+      { "emoji": "🌊", "name": "River Rafting" }
+    ],
+    "bestTime": "October–June for snow and clear weather. July–September for green valleys (but Rohtang may close). December–February for skiing.",
+    "howToReach": [
+      { "mode": "Flight", "detail": "Bhuntar Airport (KUU), 50 km away — limited flights from Delhi. Chandigarh is the nearest major airport (270 km).", "icon": "✈️" },
+      { "mode": "Train", "detail": "Nearest station: Jogindernagar or Ambala. Take a bus/taxi from there.", "icon": "🚂" },
+      { "mode": "Bus", "detail": "HRTC Volvo buses from Delhi ISBT (~14 hrs overnight). Very comfortable and affordable.", "icon": "🚌" }
+    ],
+    "lat": 32.2396,
+    "lon": 77.1887,
+    "emergency": {
+      "police": "100",
+      "ambulance": "108",
+      "tourist": "1800-180-8008",
+      "hospital": "Zonal Hospital Manali: 01902-252007"
+    },
+    "festivals": [
+      { "name": "Hadimba Devi Fair", "month": "May", "desc": "3-day festival at Hadimba Temple with folk music" },
+      { "name": "Doongri Festival", "month": "May", "desc": "Colorful local cultural festival" },
+      { "name": "Shivratri Fair", "month": "Feb/Mar", "desc": "Major fair in Manali and Kullu valley" }
+    ]
+  },
+  "jaipur": {
+    "name": "Jaipur",
+    "emoji": "🏰",
+    "tagline": "The Pink City",
+    "gradient": "from-orange-500 to-pink-600",
+    "type": "Heritage",
+    "rating": 4.6,
+    "reviews": "15.2k",
+    "duration": "3–5 days",
+    "budget": "₹6,000–₹20,000",
+    "photo": "",
+    "description": "Jaipur, the capital of Rajasthan, is one of India's most iconic cities. Its old city core was painted pink to welcome the Prince of Wales in 1876 — and the nickname stuck. Today it's a UNESCO World Heritage City and part of the Golden Triangle tourist circuit with Delhi and Agra.",
+    "highlights": [
+      { "icon": "🏯", "title": "Amber Fort", "desc": "A majestic fort-palace complex overlooking Maota Lake. Elephant rides to the gate, intricate mirror work inside — stunning at sunrise." },
+      { "icon": "🌬️", "title": "Hawa Mahal", "desc": "The iconic \"Palace of Winds\" — 953 small windows designed so royal women could observe street life unseen." },
+      { "icon": "🌌", "title": "Jantar Mantar", "desc": "UNESCO-listed astronomical observatory built in 1734 with 19 astronomical instruments — the world's largest stone sundial is here." },
+      { "icon": "🛍️", "title": "Bazaars", "desc": "Johari Bazaar for gems and jewellery, Bapu Bazaar for textiles, and Tripolia Bazaar for lac bangles and traditional crafts." }
+    ],
+    "thingsToDo": [
+      { "emoji": "🐘", "name": "Elephant Ride" },
+      { "emoji": "🛍️", "name": "Gem Shopping" },
+      { "emoji": "🎭", "name": "Cultural Show" },
+      { "emoji": "🍛", "name": "Dal Baati" },
+      { "emoji": "🏰", "name": "Fort Hopping" },
+      { "emoji": "🎨", "name": "Block Printing" },
+      { "emoji": "🌅", "name": "Nahargarh Sunset" },
+      { "emoji": "🎪", "name": "Puppet Show" }
+    ],
+    "bestTime": "October to March — cool and pleasant. Avoid April–June (extreme heat, 45°C+). Jaipur Literature Festival is in January.",
+    "howToReach": [
+      { "mode": "Flight", "detail": "Jaipur International Airport (JAI) — frequent flights from Delhi (1 hr), Mumbai (1.5 hrs), Bangalore.", "icon": "✈️" },
+      { "mode": "Train", "detail": "Jaipur Junction — well connected to Delhi (4.5 hrs by Shatabdi), Agra, Mumbai, and all major cities.", "icon": "🚂" },
+      { "mode": "Bus", "detail": "From Delhi: 5–6 hrs by Rajasthan roadways or private Volvos. Part of Golden Triangle road trips.", "icon": "🚌" }
+    ],
+    "lat": 26.9124,
+    "lon": 75.7873,
+    "emergency": {
+      "police": "100",
+      "ambulance": "108",
+      "tourist": "1800-180-6127",
+      "hospital": "SMS Hospital: 0141-2518377"
+    },
+    "festivals": [
+      { "name": "Jaipur Literature Festival", "month": "Jan", "desc": "World's largest free literary festival" },
+      { "name": "Teej Festival", "month": "Jul/Aug", "desc": "Monsoon festival with processions and swings" },
+      { "name": "Elephant Festival", "month": "Mar", "desc": "Elephant polo, painting, and races at Chaugan stadium" }
+    ]
+  },
+  "kerala": {
+    "name": "Kerala",
+    "emoji": "🌿",
+    "tagline": "God's Own Country",
+    "gradient": "from-green-500 to-emerald-700",
+    "type": "Backwaters",
+    "rating": 4.9,
+    "reviews": "18.7k",
+    "duration": "5–7 days",
+    "budget": "₹12,000–₹35,000",
+    "photo": "",
+    "description": "Kerala is a state unlike any other in India. Palm-fringed backwaters, misty tea estates, Ayurvedic resorts, elephant festivals, Chinese fishing nets, and the most literate population in India — it has earned its title as God's Own Country many times over.",
+    "highlights": [
+      { "icon": "🚢", "title": "Alleppey Backwaters", "desc": "Float through 900+ km of interconnected canals, lagoons, and lakes on a traditional Kerala houseboat. Wake up to sunrise over the water." },
+      { "icon": "🍵", "title": "Munnar Tea Gardens", "desc": "Rolling hills carpeted in emerald-green tea plants at 1,600m altitude. Cool, misty mornings and the aroma of freshly plucked tea leaves." },
+      { "icon": "🐘", "title": "Elephant Sanctuary", "desc": "Kodanad and Thekkady offer ethical elephant encounters. The Thrissur Pooram festival features 100 decorated elephants." },
+      { "icon": "🧘", "title": "Ayurveda", "desc": "Kerala is the birthplace of Ayurveda. Authentic Panchakarma treatments, herbal therapies, and wellness retreats are world-renowned." }
+    ],
+    "thingsToDo": [
+      { "emoji": "🛶", "name": "Houseboat Stay" },
+      { "emoji": "🧘", "name": "Ayurveda Spa" },
+      { "emoji": "🎣", "name": "Chinese Nets" },
+      { "emoji": "🌿", "name": "Tea Plantation" },
+      { "emoji": "🐘", "name": "Elephant Camp" },
+      { "emoji": "🤿", "name": "Snorkelling" },
+      { "emoji": "🎭", "name": "Kathakali Show" },
+      { "emoji": "🍌", "name": "Banana Leaf Meal" }
+    ],
+    "bestTime": "September to March — monsoon has cleared, backwaters full, weather pleasant. June–August is monsoon season (dramatic but rainy).",
+    "howToReach": [
+      { "mode": "Flight", "detail": "Kochi (COK) is the main airport — direct flights from Dubai, Singapore, and all Indian metros.", "icon": "✈️" },
+      { "mode": "Train", "detail": "Excellent rail connectivity — Ernakulam, Thiruvananthapuram, Kozhikode all well connected.", "icon": "🚂" },
+      { "mode": "Bus", "detail": "KSRTC super-fast buses connect all Kerala cities. From Bangalore to Kochi: ~9 hrs.", "icon": "🚌" }
+    ],
+    "lat": 10.8505,
+    "lon": 76.2711,
+    "emergency": {
+      "police": "100",
+      "ambulance": "108",
+      "tourist": "1800-425-4747",
+      "hospital": "Government Medical College Kochi: 0484-2395624"
+    },
+    "festivals": [
+      { "name": "Onam", "month": "Aug/Sep", "desc": "Kerala's biggest harvest festival — snake boat races, elephant processions, 9-day feast" },
+      { "name": "Thrissur Pooram", "month": "Apr/May", "desc": "World's grandest temple festival — 100 elephants, fireworks, percussion" },
+      { "name": "Vishu", "month": "Apr", "desc": "Kerala New Year — kani viewing, fireworks, new clothes" }
+    ]
+  },
+  "ladakh": {
+    "name": "Ladakh",
+    "emoji": "🎒",
+    "tagline": "Land of High Passes",
+    "gradient": "from-indigo-500 to-purple-700",
+    "type": "Adventure",
+    "rating": 4.9,
+    "reviews": "7.3k",
+    "duration": "7–10 days",
+    "budget": "₹20,000–₹50,000",
+    "photo": "",
+    "description": "At an average altitude of 3,500m, Ladakh is the highest, driest, and most remote region in India. It's a Buddhist kingdom with dramatic landscapes — azure lakes, rust-red monasteries perched on cliffs, and a night sky so clear you can see the Milky Way with the naked eye.",
+    "highlights": [
+      { "icon": "💙", "title": "Pangong Tso Lake", "desc": "The electric blue lake at 4,350m that changes colour through the day. The lake extends into Tibet — 60% of it is in China. Made famous by 3 Idiots." },
+      { "icon": "🏔️", "title": "Khardung La Pass", "desc": "One of the world's highest motorable roads at 5,359m. A bucket-list biker's dream — snow on either side even in July." },
+      { "icon": "☸️", "title": "Monasteries", "desc": "Thiksey, Hemis, Diskit, and Lamayuru monasteries — thousand-year-old Buddhist centres with giant Buddha statues and monk chanting." },
+      { "icon": "🐪", "title": "Nubra Valley", "desc": "A high-altitude cold desert with double-humped Bactrian camels, sand dunes, and the Siachen base camp nearby." }
+    ],
+    "thingsToDo": [
+      { "emoji": "🏍️", "name": "Bike Trip" },
+      { "emoji": "🥾", "name": "Trekking" },
+      { "emoji": "🎿", "name": "River Rafting" },
+      { "emoji": "🌌", "name": "Stargazing" },
+      { "emoji": "🙏", "name": "Monastery Visit" },
+      { "emoji": "🐪", "name": "Camel Safari" },
+      { "emoji": "📸", "name": "Photography" },
+      { "emoji": "🏕️", "name": "Camping" }
+    ],
+    "bestTime": "June to September — roads open, weather ideal. Pangong and Nubra accessible. December–March for Chadar trek (frozen Zanskar river).",
+    "howToReach": [
+      { "mode": "Flight", "detail": "Leh Kushok Bakula Airport (IXL) — daily flights from Delhi (1 hr) and Srinagar. Book early, seats fill fast.", "icon": "✈️" },
+      { "mode": "Road", "detail": "Manali–Leh Highway (480 km, 2 days) or Srinagar–Leh Highway (434 km) — epic but only June to October.", "icon": "🚗" },
+      { "mode": "Train", "detail": "No railway in Ladakh. Nearest station is Jammu Tawi or Chandigarh — then bus or taxi.", "icon": "🚂" }
+    ],
+    "lat": 34.1526,
+    "lon": 77.5771,
+    "emergency": {
+      "police": "100",
+      "ambulance": "108",
+      "tourist": "01982-252297",
+      "hospital": "SNM Hospital Leh: 01982-252014"
+    },
+    "festivals": [
+      { "name": "Hemis Festival", "month": "Jun/Jul", "desc": "Largest monastery festival in Ladakh — masked dances, traditional music" },
+      { "name": "Losar", "month": "Dec/Jan", "desc": "Tibetan New Year celebrated across Ladakh" },
+      { "name": "Sindhu Darshan", "month": "Jun", "desc": "Festival on the banks of the Indus river" }
+    ]
+  },
+  "varanasi": {
+    "name": "Varanasi",
+    "emoji": "🛕",
+    "tagline": "The Spiritual Capital of India",
+    "gradient": "from-amber-500 to-orange-600",
+    "type": "Spiritual",
+    "rating": 4.5,
+    "reviews": "11.2k",
+    "duration": "3–4 days",
+    "budget": "₹5,000–₹15,000",
+    "photo": "",
+    "description": "One of the oldest continuously inhabited cities on Earth, Varanasi (also called Kashi or Benaras) sits on the banks of the Ganges. It's the holiest city in Hinduism — where Hindus believe dying means attaining moksha (liberation). Mark Twain called it 'older than history, older than tradition, older than legend.'",
+    "highlights": [
+      { "icon": "🔥", "title": "Ganga Aarti", "desc": "Every evening at Dashashwamedh Ghat, priests perform a mesmerising fire ceremony to the Ganges — with bells, incense, and thousands of devotees watching." },
+      { "icon": "🛶", "title": "Boat Ride at Dawn", "desc": "A sunrise boat ride along the 84 ghats reveals the city's soul — ritual bathers, cremation fires at Manikarnika, sadhus meditating at the water's edge." },
+      { "icon": "🌀", "title": "Manikarnika Ghat", "desc": "The main cremation ghat, burning 24/7 for 3,500+ years. Witnessing it is a profound, unforgettable experience of life and death." },
+      { "icon": "🎵", "title": "Classical Music", "desc": "Varanasi is the birthplace of Hindustani classical music (Ravi Shankar's city). Evening concerts at ghats and ashrams are deeply moving." }
+    ],
+    "thingsToDo": [
+      { "emoji": "🛶", "name": "Ganga Boat Ride" },
+      { "emoji": "🙏", "name": "Ganga Aarti" },
+      { "emoji": "🌅", "name": "Sunrise at Ghats" },
+      { "emoji": "🍵", "name": "Malaiyo & Lassi" },
+      { "emoji": "🧵", "name": "Banarasi Silk" },
+      { "emoji": "🎵", "name": "Classical Music" },
+      { "emoji": "🕌", "name": "Kashi Vishwanath" },
+      { "emoji": "🏺", "name": "Pottery Classes" }
+    ],
+    "bestTime": "October to March — cool, comfortable. Dev Deepawali in November is spectacular (ghats lit with a million lamps). Avoid May–June (extreme heat).",
+    "howToReach": [
+      { "mode": "Flight", "detail": "Lal Bahadur Shastri Airport (VNS) — flights from Delhi, Mumbai, Bangalore, Kolkata.", "icon": "✈️" },
+      { "mode": "Train", "detail": "Varanasi Junction — well connected. Kashi Express from Delhi, Mahanagri Express from Mumbai.", "icon": "🚂" },
+      { "mode": "Bus", "detail": "From Lucknow (~3 hrs), Allahabad (~1.5 hrs), Ayodhya (~4 hrs) by bus or shared taxi.", "icon": "🚌" }
+    ],
+    "lat": 25.3176,
+    "lon": 82.9739,
+    "emergency": {
+      "police": "100",
+      "ambulance": "108",
+      "tourist": "1800-180-5555",
+      "hospital": "Sir Sunderlal Hospital BHU: 0542-2307491"
+    },
+    "festivals": [
+      { "name": "Dev Deepawali", "month": "Nov", "desc": "A million oil lamps lit on the ghats — the most spectacular night in Varanasi" },
+      { "name": "Ganga Mahotsav", "month": "Nov", "desc": "5-day cultural festival celebrating the Ganges" },
+      { "name": "Maha Shivratri", "month": "Feb/Mar", "desc": "Major all-night festival at Kashi Vishwanath temple" }
+    ]
+  },
+  "rishikesh": {
+    "name": "Rishikesh",
+    "emoji": "🧘",
+    "tagline": "Yoga Capital of the World",
+    "gradient": "from-green-500 to-teal-700",
+    "type": "Adventure",
+    "rating": 4.6,
+    "reviews": "8.9k",
+    "duration": "3–5 days",
+    "budget": "₹5,000–₹15,000",
+    "photo": "",
+    "description": "Where the Ganges emerges from the Himalayas into the plains, Rishikesh sits as India's spiritual and adventure capital. The Beatles visited in 1968 and put it on the world map. Today it's equally famous for white-water rafting, bungee jumping, and yoga retreats — often simultaneously.",
+    "highlights": [
+      { "icon": "🌉", "title": "Laxman Jhula", "desc": "The iconic suspension bridge over the Ganges, connecting two sides of the town. Great views, chai shops, and ashrams on either end." },
+      { "icon": "🌊", "title": "White-Water Rafting", "desc": "16–36 km rafting stretches through class 3–4 rapids on the Ganges — one of India's best rafting experiences." },
+      { "icon": "🧘", "title": "Yoga & Ashrams", "desc": "Hundreds of yoga schools and ashrams — from beginner sessions to 200-hour teacher trainings. The Parmarth Niketan evening Ganga Aarti is unmissable." },
+      { "icon": "🌄", "title": "Beatle Ashram", "desc": "Maharishi Mahesh Yogi's ashram where The Beatles wrote most of the White Album. Now an artistic ruin open to visitors." }
+    ],
+    "thingsToDo": [
+      { "emoji": "🌊", "name": "River Rafting" },
+      { "emoji": "🧘", "name": "Yoga Class" },
+      { "emoji": "🪂", "name": "Bungee Jumping" },
+      { "emoji": "🏕️", "name": "Beach Camping" },
+      { "emoji": "🌅", "name": "Ganga Aarti" },
+      { "emoji": "🌿", "name": "Ayurveda" },
+      { "emoji": "🥾", "name": "Waterfall Trek" },
+      { "emoji": "🎸", "name": "Beatles Ashram" }
+    ],
+    "bestTime": "September to June — rafting best in Sep–Nov and Mar–May. December–February is cold but peaceful for yoga. Avoid July–August (monsoon, rafting stopped).",
+    "howToReach": [
+      { "mode": "Flight", "detail": "Jolly Grant Airport, Dehradun (40 km) — flights from Delhi. Then taxi to Rishikesh.", "icon": "✈️" },
+      { "mode": "Train", "detail": "Haridwar Junction (25 km) is the nearest major station — then bus or auto to Rishikesh.", "icon": "🚂" },
+      { "mode": "Bus", "detail": "From Delhi: 6–7 hrs by Volvo from ISBT Kashmere Gate. Very frequent departures.", "icon": "🚌" }
+    ],
+    "lat": 30.0869,
+    "lon": 78.2676,
+    "emergency": {
+      "police": "100",
+      "ambulance": "108",
+      "tourist": "0135-2430372",
+      "hospital": "AIIMS Rishikesh: 0135-2462935"
+    },
+    "festivals": [
+      { "name": "International Yoga Festival", "month": "Mar", "desc": "World's largest yoga festival — 1,000+ teachers, 200+ nationalities" },
+      { "name": "Ganga Aarti", "month": "Daily", "desc": "Spectacular evening fire ceremony at Triveni Ghat" },
+      { "name": "Kanwar Mela", "month": "Jul/Aug", "desc": "Massive pilgrimage festival on the banks of Ganges" }
+    ]
+  },
+  "udaipur": {
+    "name": "Udaipur",
+    "emoji": "🏯",
+    "tagline": "The City of Lakes",
+    "gradient": "from-rose-500 to-pink-700",
+    "type": "Heritage",
+    "rating": 4.8,
+    "reviews": "13.5k",
+    "duration": "3–4 days",
+    "budget": "₹8,000–₹25,000",
+    "photo": "",
+    "description": "Udaipur is the most romantic city in India. Surrounded by the Aravalli Hills and built around a series of artificial lakes, it's a city of white marble palaces, boat rides at sunset, and rooftop restaurants overlooking Lake Pichola. It's repeatedly voted one of the world's most beautiful cities.",
+    "highlights": [
+      { "icon": "🏰", "title": "City Palace", "desc": "The largest palace complex in Rajasthan — built over 400 years by 22 different maharajas. Stunning lake views, crystal galleries, and peacock courtyards." },
+      { "icon": "🛶", "title": "Lake Pichola", "desc": "Boat rides to the Lake Palace (now the Taj Lake Palace hotel) and Jag Mandir island. Sunset boat rides are pure magic." },
+      { "icon": "🎨", "title": "Miniature Paintings", "desc": "Udaipur is the centre of Rajasthani miniature painting. Watch artists work and buy authentic paintings directly from studios." },
+      { "icon": "🌅", "title": "Sajjangarh Monsoon Palace", "desc": "A hilltop palace offering panoramic views of the lakes, city, and Aravalli ranges — spectacular at sunset." }
+    ],
+    "thingsToDo": [
+      { "emoji": "🛶", "name": "Lake Boat Ride" },
+      { "emoji": "🎨", "name": "Art Galleries" },
+      { "emoji": "🍽️", "name": "Rooftop Dining" },
+      { "emoji": "🛍️", "name": "Handicraft Shopping" },
+      { "emoji": "🏰", "name": "Palace Tour" },
+      { "emoji": "🌅", "name": "Sunset Point" },
+      { "emoji": "🎭", "name": "Cultural Show" },
+      { "emoji": "🐎", "name": "Horse Ride" }
+    ],
+    "bestTime": "October to March — ideal weather. The Mewar Festival in March is vibrant. Avoid April–June (very hot).",
+    "howToReach": [
+      { "mode": "Flight", "detail": "Maharana Pratap Airport (UDR) — flights from Delhi, Mumbai, Jaipur, Bangalore.", "icon": "✈️" },
+      { "mode": "Train", "detail": "Udaipur City Railway Station — connected to Delhi (Chetak Express), Jaipur, Ajmer, and Mumbai.", "icon": "🚂" },
+      { "mode": "Bus", "detail": "From Jaipur: ~5 hrs. From Ahmedabad: ~4 hrs. Good road connectivity via NH48.", "icon": "🚌" }
+    ],
+    "lat": 24.5854,
+    "lon": 73.7125,
+    "emergency": {
+      "police": "100",
+      "ambulance": "108",
+      "tourist": "1800-180-6127",
+      "hospital": "RNT Medical College: 0294-2528811"
+    },
+    "festivals": [
+      { "name": "Mewar Festival", "month": "Mar/Apr", "desc": "Colourful welcome to spring — processions, fireworks, cultural programs" },
+      { "name": "Shilpgram Crafts Fair", "month": "Dec", "desc": "10-day rural arts and crafts festival near Udaipur" },
+      { "name": "Gangaur Festival", "month": "Mar/Apr", "desc": "Women's festival celebrating Goddess Gauri — colorful processions" }
+    ]
+  },
+  "shimla": {
+    "name": "Shimla",
+    "emoji": "🚃",
+    "tagline": "Queen of Hill Stations",
+    "gradient": "from-sky-500 to-blue-700",
+    "type": "Mountains",
+    "rating": 4.5,
+    "reviews": "10.1k",
+    "duration": "3–5 days",
+    "budget": "₹7,000–₹20,000",
+    "photo": "",
+    "description": "Shimla was the summer capital of British India and still retains its colonial charm. Set at 2,200m in the Shivalik ranges, it offers a perfect blend of Victorian architecture, deodar forests, and Himalayan views — all walkable from the famous pedestrian-only Mall Road.",
+    "highlights": [
+      { "icon": "🚂", "title": "Toy Train", "desc": "The Kalka-Shimla UNESCO World Heritage railway winds through 102 tunnels and 800+ bridges in 96 km. One of the most scenic train journeys in the world." },
+      { "icon": "🛕", "title": "Jakhu Temple", "desc": "A 200-year-old Hanuman temple at 2,455m — Shimla's highest point. Reach by ropeway or a 2 km trek (watch out for the cheeky monkeys)." },
+      { "icon": "🏛️", "title": "The Ridge & Mall Road", "desc": "The heart of Shimla — a flat, open promenade with mountain views, Victorian architecture, and the town's best cafes and shops." },
+      { "icon": "❄️", "title": "Kufri & Naldehra", "desc": "Nearby day trips — Kufri has snow activities and mini-zoo, Naldehra has India's oldest golf course." }
+    ],
+    "thingsToDo": [
+      { "emoji": "🚃", "name": "Toy Train Ride" },
+      { "emoji": "❄️", "name": "Snow Activities" },
+      { "emoji": "🥾", "name": "Nature Walks" },
+      { "emoji": "🛕", "name": "Jakhu Temple" },
+      { "emoji": "🍏", "name": "Apple Orchards" },
+      { "emoji": "🎿", "name": "Skiing (Kufri)" },
+      { "emoji": "🛍️", "name": "Mall Road" },
+      { "emoji": "🌲", "name": "Forest Walks" }
+    ],
+    "bestTime": "March–June for pleasant weather. December–February for snow. Avoid July–August (heavy rain, landslides).",
+    "howToReach": [
+      { "mode": "Flight", "detail": "Jubbarhatti Airport (SLV), 23 km — limited flights. Chandigarh (120 km) is the practical air option.", "icon": "✈️" },
+      { "mode": "Train", "detail": "Kalka–Shimla toy train (UNESCO heritage). Or take Shatabdi to Kalka from Delhi, then toy train.", "icon": "🚂" },
+      { "mode": "Bus", "detail": "From Delhi: ~8 hrs by HRTC Volvo from ISBT Kashmere Gate. Very frequent.", "icon": "🚌" }
+    ],
+    "lat": 31.1048,
+    "lon": 77.1734,
+    "emergency": {
+      "police": "100",
+      "ambulance": "108",
+      "tourist": "0177-2652561",
+      "hospital": "IGMC Shimla: 0177-2658566"
+    },
+    "festivals": [
+      { "name": "Shimla Summer Festival", "month": "Jun", "desc": "Music, dance, and cultural performances on The Ridge" },
+      { "name": "Lavi Fair", "month": "Nov", "desc": "One of Asia's oldest trade fairs — traditional Himachali goods" },
+      { "name": "Ice Skating Carnival", "month": "Jan", "desc": "Winter carnival at Asia's only natural ice skating rink" }
+    ]
+  },
+  "munnar": {
+    "name": "Munnar",
+    "emoji": "🌱",
+    "tagline": "The Tea Garden Paradise",
+    "gradient": "from-green-400 to-lime-600",
+    "type": "Hill Station",
+    "rating": 4.7,
+    "reviews": "9.8k",
+    "duration": "3–5 days",
+    "budget": "₹8,000–₹22,000",
+    "photo": "",
+    "description": "Munnar sits at the confluence of three mountain streams in the Western Ghats at 1,600m. Its endless rolling hills are carpeted in emerald tea plantations — a landscape so surreal it feels painted. Once a British planters' retreat, today it's Kerala's most popular hill station.",
+    "highlights": [
+      { "icon": "🍵", "title": "Tea Estates", "desc": "KDHP and Tata tea estates spanning thousands of acres. Walk through the bushes, meet tea pluckers, and visit factories to see how tea is made." },
+      { "icon": "🦣", "title": "Eravikulam National Park", "desc": "Home to the critically endangered Nilgiri Tahr — a mountain goat found nowhere else. Stunning rhododendron forests in March." },
+      { "icon": "💧", "title": "Attukad Waterfalls", "desc": "10+ waterfalls near Munnar — Attukad, Lakkam, and Chinnakanal cascade through tea gardens and rocky terrain." },
+      { "icon": "🌸", "title": "Neelakurinji", "desc": "Every 12 years, the Neelakurinji flower turns the hills violet-blue. Last bloom was 2018 — next expected 2030. Plan ahead!" }
+    ],
+    "thingsToDo": [
+      { "emoji": "🍵", "name": "Tea Factory Tour" },
+      { "emoji": "🦣", "name": "Wildlife Safari" },
+      { "emoji": "🌿", "name": "Plantation Walk" },
+      { "emoji": "🚵", "name": "Mountain Biking" },
+      { "emoji": "💧", "name": "Waterfall Visit" },
+      { "emoji": "☁️", "name": "Cloud Walk" },
+      { "emoji": "📸", "name": "Sunrise Photography" },
+      { "emoji": "🧺", "name": "Picnic in Tea Gardens" }
+    ],
+    "bestTime": "September to March — post-monsoon, lush and green, clear skies. December–January is cold and misty. Avoid June–August (heavy rain).",
+    "howToReach": [
+      { "mode": "Flight", "detail": "Cochin International Airport (COK), 130 km — then taxi (~3.5 hrs) or bus to Munnar.", "icon": "✈️" },
+      { "mode": "Train", "detail": "Nearest station: Ernakulam (Kochi), 130 km. Then bus or cab.", "icon": "🚂" },
+      { "mode": "Bus", "detail": "Direct KSRTC buses from Ernakulam, Coimbatore, Madurai. Beautiful scenic journey.", "icon": "🚌" }
+    ],
+    "lat": 10.0889,
+    "lon": 77.0595,
+    "emergency": {
+      "police": "100",
+      "ambulance": "108",
+      "tourist": "0486-2272620",
+      "hospital": "Government Hospital Munnar: 04865-231224"
+    },
+    "festivals": [
+      { "name": "Munnar Flower Show", "month": "Sep", "desc": "Spectacular display of rare flowers and plants across the tea estates" },
+      { "name": "Vishu", "month": "Apr", "desc": "Kerala New Year celebrated with traditional rituals" },
+      { "name": "Christmas & New Year", "month": "Dec", "desc": "Misty winter celebrations in the tea hills" }
+    ]
+  },
+  "andaman": {
+    "name": "Andaman",
+    "emoji": "🐠",
+    "tagline": "India's Tropical Island Paradise",
+    "gradient": "from-teal-500 to-cyan-700",
+    "type": "Islands",
+    "rating": 4.7,
+    "reviews": "6.8k",
+    "duration": "5–7 days",
+    "budget": "₹15,000–₹45,000",
+    "photo": "",
+    "description": "The Andaman & Nicobar Islands sit in the Bay of Bengal, 1,400 km from the Indian mainland. With turquoise water, white-sand beaches, coral reefs teeming with sea life, and a fascinating history (British used it as a prison colony), the Andamans are India's best-kept tropical secret.",
+    "highlights": [
+      { "icon": "🏖️", "title": "Radhanagar Beach", "desc": "Rated one of Asia's best beaches — 2 km of soft white sand, emerald water, and spectacular sunsets. On Havelock Island." },
+      { "icon": "🤿", "title": "Scuba Diving & Snorkelling", "desc": "Some of India's best dive sites — Nemo Reef, The Wall, Lighthouse. Visibility up to 40m. Whale sharks and manta rays spotted here." },
+      { "icon": "⛓️", "title": "Cellular Jail", "desc": "The notorious British-era prison where India's freedom fighters were imprisoned. The Light & Sound show at night is deeply moving." },
+      { "icon": "🌊", "title": "Neil Island", "desc": "A quieter, more laid-back alternative to Havelock. Natural Bridge, Sitapur beach for sunrise, and virtually no crowds." }
+    ],
+    "thingsToDo": [
+      { "emoji": "🤿", "name": "Scuba Diving" },
+      { "emoji": "🐠", "name": "Snorkelling" },
+      { "emoji": "🚤", "name": "Glass Bottom Boat" },
+      { "emoji": "🏄", "name": "Sea Walk" },
+      { "emoji": "🌊", "name": "Island Hopping" },
+      { "emoji": "🏕️", "name": "Beach Camping" },
+      { "emoji": "📸", "name": "Underwater Photos" },
+      { "emoji": "🐢", "name": "Turtle Nesting" }
+    ],
+    "bestTime": "November to April — clear water, excellent visibility for diving. Humpback whales visit October–November. Avoid May–September (monsoon, choppy seas).",
+    "howToReach": [
+      { "mode": "Flight", "detail": "Veer Savarkar Airport, Port Blair (IXZ) — flights from Chennai, Kolkata, Delhi, Bangalore, Hyderabad.", "icon": "✈️" },
+      { "mode": "Ship", "detail": "Government ships from Chennai, Kolkata, Visakhapatnam — ~60 hrs at sea. Affordable, adventurous.", "icon": "🚢" }
+    ],
+    "lat": 11.7401,
+    "lon": 92.6586,
+    "emergency": {
+      "police": "100",
+      "ambulance": "108",
+      "tourist": "03192-232694",
+      "hospital": "GB Pant Hospital: 03192-233548"
+    },
+    "festivals": [
+      { "name": "Island Tourism Festival", "month": "Jan", "desc": "Culture, folk dances, water sports competitions and exhibitions" },
+      { "name": "Subhash Mela", "month": "Jan", "desc": "Fair celebrating Netaji Subhash Chandra Bose's birthday" },
+      { "name": "Beach Festival", "month": "Nov", "desc": "Beachside cultural events and adventure sports competitions" }
+    ]
+  },
+  "darjeeling": {
+    "name": "Darjeeling",
+    "emoji": "🍵",
+    "tagline": "The Queen of the Hills",
+    "gradient": "from-emerald-500 to-teal-700",
+    "type": "Tea & Views",
+    "rating": 4.6,
+    "reviews": "7.2k",
+    "duration": "3–4 days",
+    "budget": "₹7,000–₹20,000",
+    "photo": "",
+    "description": "Darjeeling produces the world's finest tea and offers one of earth's greatest mountain views — the Kangchenjunga massif (world's 3rd highest peak) rising above the clouds at sunrise. The British built this hill station at 2,042m as a sanatorium, leaving behind a charming legacy of colonial architecture.",
+    "highlights": [
+      { "icon": "🌄", "title": "Tiger Hill Sunrise", "desc": "Wake at 3 AM for the drive to Tiger Hill (2,590m). On clear days, you see Kangchenjunga and even Everest's peak glowing gold at dawn." },
+      { "icon": "🚂", "title": "Darjeeling Himalayan Railway", "desc": "The 'Toy Train' is a UNESCO World Heritage site. The 2-hour steam engine joy ride through tea gardens is pure nostalgia." },
+      { "icon": "🍵", "title": "Tea Garden Tour", "desc": "Happy Valley and Makaibari estates offer guided tours — see plucking, withering, rolling, and drying of the world-famous first-flush tea." },
+      { "icon": "🗿", "title": "Peace Pagoda & Zoo", "desc": "Japanese Peace Pagoda with Himalayan views. Padmaja Naidu Zoo is famous for snow leopards and red pandas." }
+    ],
+    "thingsToDo": [
+      { "emoji": "🌄", "name": "Tiger Hill Sunrise" },
+      { "emoji": "🚂", "name": "Toy Train Ride" },
+      { "emoji": "🍵", "name": "Tea Tasting" },
+      { "emoji": "🐼", "name": "Red Panda Zoo" },
+      { "emoji": "🥾", "name": "Himalayan Trek" },
+      { "emoji": "🛍️", "name": "Chowrasta Mall" },
+      { "emoji": "🧘", "name": "Monastery Visit" },
+      { "emoji": "📸", "name": "Kangchenjunga View" }
+    ],
+    "bestTime": "March–May (spring, rhododendrons bloom) and October–November (crystal-clear Himalayan views). Avoid June–September (heavy monsoon, views obscured).",
+    "howToReach": [
+      { "mode": "Flight", "detail": "Bagdogra Airport (IXB), 90 km — flights from Kolkata (45 min), Delhi, Mumbai. Then taxi (~3 hrs).", "icon": "✈️" },
+      { "mode": "Train", "detail": "NJP (New Jalpaiguri) station, 75 km — then the famous toy train or taxi/bus to Darjeeling.", "icon": "🚂" },
+      { "mode": "Bus", "detail": "From Siliguri: 3–4 hrs. Shared taxis also very convenient and faster.", "icon": "🚌" }
+    ],
+    "lat": 27.0360,
+    "lon": 88.2627,
+    "emergency": {
+      "police": "100",
+      "ambulance": "108",
+      "tourist": "0354-2252050",
+      "hospital": "North Bengal Medical College: 0353-2581768"
+    },
+    "festivals": [
+      { "name": "Darjeeling Carnival", "month": "Nov", "desc": "Week-long festival with music, food, and Himalayan cultural shows" },
+      { "name": "Losar", "month": "Feb/Mar", "desc": "Tibetan New Year — monastery celebrations, masked dances" },
+      { "name": "Tea Festival", "month": "Apr", "desc": "Celebrates first flush tea with estate tours and tasting events" }
+    ]
+  }
+}

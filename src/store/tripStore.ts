@@ -59,7 +59,7 @@ export const useTripStore = create<TripStore>((set) => ({
     set((state) => ({
       days: state.days.map((day) => {
         if (day.id === fromDayId) return { ...day, activities: day.activities.filter((a) => a.id !== activity.id) }
-        if (day.id === toDayId) return { ...day, activities: [...day.activities, { ...activity, day_id: toDayId }] }
+        if (day.id === toDayId) return { ...day, activities: [...day.activities, { ...activity, day_id: toDayId, order_index: day.activities.length }] }
         return day
       }),
     })),

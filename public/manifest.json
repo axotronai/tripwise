@@ -1,0 +1,42 @@
+{
+  "name": "TripWise — India Trip Planner",
+  "short_name": "TripWise",
+  "description": "India's free AI-powered all-in-one trip planner. Plan trips, find trains, hotels and budget — offline ready.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon.svg",     "sizes": "any",     "type": "image/svg+xml" }
+  ],
+  "screenshots": [
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "form_factor": "narrow", "label": "TripWise home screen" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Plan New Trip",
+      "short_name": "New Trip",
+      "description": "Start planning a new India trip",
+      "url": "/trips/new",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Trips",
+      "short_name": "My Trips",
+      "description": "View all your saved trips",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["travel", "lifestyle", "navigation"],
+  "lang": "en-IN",
+  "dir": "ltr",
+  "prefer_related_applications": false
+}

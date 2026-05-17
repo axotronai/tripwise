@@ -1,6 +1,6 @@
 export type TravelStyle = 'budget' | 'comfort' | 'luxury' | 'adventure' | 'family'
 export type TransportMode = 'train' | 'flight' | 'bus' | 'cab'
-export type ActivityType = 'sightseeing' | 'food' | 'adventure' | 'culture' | 'beach' | 'shopping' | 'rest'
+export type ActivityType = 'sightseeing' | 'food' | 'adventure' | 'culture' | 'beach' | 'shopping' | 'rest' | 'nature' | 'wellness' | 'departure'
 
 export interface User {
   id: string
@@ -23,6 +23,7 @@ export interface Trip {
   total_budget: number
   travel_style: TravelStyle
   group_size: number
+  children?: number
   created_at: string
   days?: ItineraryDay[]
   budget_breakdown?: BudgetBreakdown

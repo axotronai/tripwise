@@ -10,6 +10,8 @@ import { formatINR } from '@/lib/utils/trip'
 interface Props {
   breakdown: BudgetBreakdown
   days: ItineraryDay[]
+  hotelCost?: number
+  hotelName?: string
 }
 
 const CATEGORIES = [
@@ -20,13 +22,13 @@ const CATEGORIES = [
   { key: 'buffer', label: 'Buffer', emoji: '🛡️', color: 'bg-gray-400' },
 ] as const
 
-export default function BudgetTracker({ breakdown, days }: Props) {
+export default function BudgetTracker({ breakdown, days, hotelCost = 0, hotelName }: Props) {
   const activitySpend = days.reduce((sum, day) =>
     sum + day.activities.reduce((s, a) => s + (a.is_free ? 0 : a.cost), 0), 0
   )
-  const totalSpent = activitySpend
+  const totalSpent = activitySpend + hotelCost
   const remaining = breakdown.total - totalSpent
-  const pctSpent = Math.min(100, (totalSpent / breakdown.total) * 100)
+  const pctSpent = breakdown.total > 0 ? Math.min(100, (totalSpent / breakdown.total) * 100) : 0
   const isOverBudget = totalSpent > breakdown.total
 
   const dailyCosts = days.map((day) => ({
@@ -34,7 +36,7 @@ export default function BudgetTracker({ breakdown, days }: Props) {
     date: day.date,
     city: day.city,
     cost: day.activities.reduce((s, a) => s + (a.is_free ? 0 : a.cost), 0),
-    budget: breakdown.total / days.length,
+    budget: days.length > 0 ? breakdown.total / days.length : 0,
   }))
 
   return (
@@ -74,16 +76,25 @@ export default function BudgetTracker({ breakdown, days }: Props) {
         </CardHeader>
         <CardContent className="space-y-3">
           {CATEGORIES.map(({ key, label, emoji, color }) => {
-            const allocated = breakdown[key]
-            const pct = breakdown.total > 0 ? Math.round((allocated / breakdown.total) * 100) : 0
+            const allocated = key === 'hotels' && hotelCost > 0 ? hotelCost : breakdown[key]
+            const pct = breakdown.total > 0 ? Math.min(100, Math.round((allocated / breakdown.total) * 100)) : 0
             return (
               <div key={key}>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="flex items-center gap-1.5">
                     <span>{emoji}</span>
                     <span className="text-gray-700">{label}</span>
+                    {key === 'hotels' && hotelName && (
+                      <span className="text-xs text-purple-600 font-medium truncate max-w-[120px]">· {hotelName}</span>
+                    )}
                   </span>
-                  <span className="font-medium">{formatINR(allocated)} <span className="text-gray-400 font-normal">({pct}%)</span></span>
+                  <span className="font-medium">
+                    {formatINR(allocated)}
+                    {key === 'hotels' && hotelCost > 0
+                      ? <span className="text-green-600 font-normal text-xs ml-1">✓ booked</span>
+                      : <span className="text-gray-400 font-normal"> ({pct}%)</span>
+                    }
+                  </span>
                 </div>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div className={`h-full ${color} rounded-full`} style={{ width: `${pct}%` }} />
