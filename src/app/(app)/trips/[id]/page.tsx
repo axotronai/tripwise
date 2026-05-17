@@ -21,6 +21,7 @@ import TransportSearch, { AddedTransport } from '@/components/transport/Transpor
 import RestaurantSearch from '@/components/trip/RestaurantSearch'
 import PlacesExplorer from '@/components/trip/PlacesExplorer'
 import ExpenseTracker from '@/components/trip/ExpenseTracker'
+import PlanWizard from '@/components/planning/PlanWizard'
 import WeatherWidget from '@/components/trip/WeatherWidget'
 import { SelectedHotel, TripDay } from '@/components/hotel/HotelSearch'
 import { useTripStore } from '@/store/tripStore'
@@ -112,6 +113,7 @@ function TripPageInner() {
   const [savedTransports,   setSavedTransports]   = useState<Transport[]>([])
   const [addedTransportIds, setAddedTransportIds] = useState<Set<string>>(new Set())
   const [budgetWarning,     setBudgetWarning]     = useState<string | null>(null)
+  const [showWizard,        setShowWizard]        = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -500,6 +502,13 @@ function TripPageInner() {
             >
               <Printer className="h-4 w-4" /> <span className="hidden sm:inline">Export PDF</span>
             </a>
+            <Button
+              onClick={() => setShowWizard(true)}
+              className="gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md h-9 font-semibold"
+            >
+              🗺️ <span className="hidden sm:inline">Plan Step by Step</span>
+              <span className="sm:hidden text-xs">Plan</span>
+            </Button>
             <a href={`https://wa.me/?text=${encodeURIComponent(`Check my ${currentTrip.total_days}-day trip to ${currentTrip.destination} on TripWise! ${window.location.href}`)}`}
               target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-green-50 hover:text-green-700 hover:border-green-300 transition-colors h-9">
@@ -937,6 +946,20 @@ function TripPageInner() {
         dayHotels={dayHotels}
         savedTransports={savedTransports}
       />
+
+      {/* Step-by-step Planning Wizard */}
+      {showWizard && (
+        <PlanWizard
+          trip={currentTrip}
+          existingDays={days}
+          onComplete={(newDays) => {
+            setDays(newDays)
+            setShowWizard(false)
+            toast.success('🎉 Itinerary updated from your plan!')
+          }}
+          onClose={() => setShowWizard(false)}
+        />
+      )}
     </div>
   )
 }
