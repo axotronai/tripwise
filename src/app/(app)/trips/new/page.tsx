@@ -292,13 +292,25 @@ function NewTripForm() {
 
   // ── Quick-date helpers ───────────────────────────────────────────────────
 
+  const fmt = (d: Date) => d.toISOString().split('T')[0]
+
   function setQuickDays(n: number) {
     const start = new Date()
     start.setDate(start.getDate() + 1)
-    const end = new Date(start)
-    end.setDate(start.getDate() + n - 1)
-    const fmt = (d: Date) => d.toISOString().split('T')[0]
-    setForm(f => ({ ...f, start_date: fmt(start), end_date: fmt(end) }))
+    const startStr = fmt(start)
+    setForm(f => {
+      if (f.isMultiCity && f.extraDestinations.length > 0) {
+        // In multi-city mode ignore n — end_date is controlled by per-city nights allocation
+        const allCities = [f.destination, ...f.extraDestinations]
+        const nights = allCities.reduce((sum, city) => sum + (f.daysPerDestination[city] ?? 2), 0)
+        const end = new Date(start)
+        end.setDate(start.getDate() + nights - 1)
+        return { ...f, start_date: startStr, end_date: fmt(end) }
+      }
+      const end = new Date(start)
+      end.setDate(start.getDate() + n - 1)
+      return { ...f, start_date: startStr, end_date: fmt(end) }
+    })
   }
 
   // ── Group type side-effects ──────────────────────────────────────────────
@@ -316,20 +328,35 @@ function NewTripForm() {
 
   // ── Multi-city helpers ───────────────────────────────────────────────────
 
+  function recomputeEndDate(f: TripForm, newExtraDests: string[], newDPD: Record<string, number>): string {
+    if (!f.start_date || !f.isMultiCity) return f.end_date
+    const allCities = [f.destination, ...newExtraDests]
+    const nights = allCities.reduce((sum, c) => sum + (newDPD[c] ?? 2), 0)
+    const end = new Date(f.start_date)
+    end.setDate(end.getDate() + nights - 1)
+    return fmt(end)
+  }
+
   function addExtraCity() {
     const city = extraCityInput.trim()
     if (!city) return
     if (form.extraDestinations.length >= 3) { toast.error('Max 3 extra cities'); return }
     if (form.extraDestinations.includes(city)) { toast.error('City already added'); return }
-    setForm(f => ({ ...f, extraDestinations: [...f.extraDestinations, city] }))
+    setForm(f => {
+      const newExtras = [...f.extraDestinations, city]
+      const end_date = recomputeEndDate(f, newExtras, f.daysPerDestination)
+      return { ...f, extraDestinations: newExtras, end_date }
+    })
     setExtraCityInput('')
   }
 
   function removeExtraCity(city: string) {
     setForm(f => {
-      const newDays = { ...f.daysPerDestination }
-      delete newDays[city]
-      return { ...f, extraDestinations: f.extraDestinations.filter(c => c !== city), daysPerDestination: newDays }
+      const newDPD = { ...f.daysPerDestination }
+      delete newDPD[city]
+      const newExtras = f.extraDestinations.filter(c => c !== city)
+      const end_date = recomputeEndDate(f, newExtras, newDPD)
+      return { ...f, extraDestinations: newExtras, daysPerDestination: newDPD, end_date }
     })
   }
 
@@ -340,16 +367,31 @@ function NewTripForm() {
   }
 
   function setDaysForCity(city: string, days: number) {
-    setForm(f => ({ ...f, daysPerDestination: { ...f.daysPerDestination, [city]: Math.max(1, days) } }))
+    setForm(f => {
+      const newDPD = { ...f.daysPerDestination, [city]: Math.max(1, days) }
+      // Auto-update end_date whenever city nights change (if start_date is already set)
+      if (f.start_date && f.isMultiCity) {
+        const allCities = [f.destination, ...f.extraDestinations]
+        const nights = allCities.reduce((sum, c) => sum + (newDPD[c] ?? 2), 0)
+        const end = new Date(f.start_date)
+        end.setDate(end.getDate() + nights - 1)
+        return { ...f, daysPerDestination: newDPD, end_date: fmt(end) }
+      }
+      return { ...f, daysPerDestination: newDPD }
+    })
   }
 
   // When multi-city + start_date is set, auto-compute end_date from allocated nights
+  // Convention: n nights = n days (same as single-city setQuickDays)
   function autoSetEndDate(startDate: string) {
-    if (!form.isMultiCity) return
-    const nights = totalAllocatedNights()
-    const end = new Date(startDate)
-    end.setDate(end.getDate() + nights)
-    setForm(f => ({ ...f, start_date: startDate, end_date: end.toISOString().split('T')[0] }))
+    setForm(f => {
+      if (!f.isMultiCity) return { ...f, start_date: startDate }
+      const allCities = [f.destination, ...f.extraDestinations]
+      const nights = allCities.reduce((sum, city) => sum + (f.daysPerDestination[city] ?? 2), 0)
+      const end = new Date(startDate)
+      end.setDate(end.getDate() + nights - 1)   // FIX: -1 so 5 nights → 5 days, not 6
+      return { ...f, start_date: startDate, end_date: fmt(end) }
+    })
   }
 
   // ── Interest toggle ──────────────────────────────────────────────────────
@@ -405,46 +447,50 @@ function NewTripForm() {
     }
     if (duration < 1) { toast.error('End date must be after start date'); return }
 
-    // Multi-city validation: allocated nights must match the date range
+    // Multi-city: auto-sync end_date from allocated nights if there's a mismatch
+    // (can happen if user went back and changed city nights without re-picking start date)
+    let resolvedForm = form
     if (form.isMultiCity && form.extraDestinations.length > 0) {
       const allocated = totalAllocatedNights()
       if (allocated !== duration) {
-        toast.error(
-          `Allocated nights (${allocated}) must match your trip duration (${duration} days). ` +
-          `Please adjust the nights per destination.`
-        )
-        return
+        const end = new Date(form.start_date)
+        end.setDate(end.getDate() + allocated - 1)
+        const fixedEndDate = fmt(end)
+        resolvedForm = { ...form, end_date: fixedEndDate }
+        setForm(resolvedForm)
       }
     }
 
     setGenerating(true)
 
     try {
-      const allDestinations = [form.destination, ...form.extraDestinations]
-
-      // For multi-city trips, use allocated nights (validated to equal duration above)
-      const effectiveDays = form.isMultiCity && form.extraDestinations.length > 0
-        ? totalAllocatedNights()
+      const allDestinations = [resolvedForm.destination, ...resolvedForm.extraDestinations]
+      const resolvedDuration = resolvedForm.start_date && resolvedForm.end_date
+        ? getTripDuration(resolvedForm.start_date, resolvedForm.end_date)
         : duration
 
+      // For multi-city: use allocated nights; for single-city: use date-derived duration
+      const effectiveDays = resolvedForm.isMultiCity && resolvedForm.extraDestinations.length > 0
+        ? totalAllocatedNights()
+        : resolvedDuration
+
       const planPayload = {
-        destination: form.destination,
-        extra_destinations: form.extraDestinations,
-        start_city: form.start_city,
-        start_date: form.start_date,
-        end_date: form.end_date,
+        destination: resolvedForm.destination,
+        extra_destinations: resolvedForm.extraDestinations,
+        start_city: resolvedForm.start_city,
+        start_date: resolvedForm.start_date,
+        end_date: resolvedForm.end_date,
         total_days: effectiveDays,
-        group_type: form.groupType,
-        group_size: form.group_size,
-        children: form.children,
-        total_budget: form.total_budget,
-        travel_style: form.travel_style,
-        interests: form.interests,
-        diet: form.diet,
-        transport_pref: form.transport_pref,
-        // Per-city nights for multi-city (lets AI distribute days correctly)
-        nights_per_destination: form.isMultiCity && Object.keys(form.daysPerDestination).length > 0
-          ? form.daysPerDestination
+        group_type: resolvedForm.groupType,
+        group_size: resolvedForm.group_size,
+        children: resolvedForm.children,
+        total_budget: resolvedForm.total_budget,
+        travel_style: resolvedForm.travel_style,
+        interests: resolvedForm.interests,
+        diet: resolvedForm.diet,
+        transport_pref: resolvedForm.transport_pref,
+        nights_per_destination: resolvedForm.isMultiCity && Object.keys(resolvedForm.daysPerDestination).length > 0
+          ? resolvedForm.daysPerDestination
           : undefined,
       }
 
@@ -463,14 +509,15 @@ function NewTripForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           destination: allDestinations.join(' → '),
-          start_city: form.start_city,
-          start_date: form.start_date,
-          end_date: form.end_date,
+          start_city: resolvedForm.start_city,
+          start_date: resolvedForm.start_date,
+          end_date: resolvedForm.end_date,
           total_days: effectiveDays,
-          total_budget: form.total_budget,
-          travel_style: form.travel_style,
-          group_size: form.group_size,
-          children: form.children,
+          total_budget: resolvedForm.total_budget,
+          travel_style: resolvedForm.travel_style,
+          group_size: resolvedForm.group_size,
+          children: resolvedForm.children,
+          diet: resolvedForm.diet,
           title: `${allDestinations.join(' → ')} Trip`,
         }),
       })
@@ -480,7 +527,7 @@ function NewTripForm() {
 
       // 3. Save generated itinerary
       if (planData.days?.length) {
-        const startDate = new Date(form.start_date)
+        const startDate = new Date(resolvedForm.start_date)
         const daysWithDates = (planData.days as Array<{ day_number: number } & Record<string, unknown>>).map(
           (d, i) => {
             const date = new Date(startDate)
@@ -1004,27 +1051,33 @@ function NewTripForm() {
                   <h1 className="text-3xl font-extrabold text-gray-900">
                     What's your total trip budget?
                   </h1>
-                  <p className="text-gray-500 mt-1">For all {form.group_size} people, {duration} days</p>
+                  <p className="text-gray-500 mt-1">
+                    For {form.group_size + form.children} {form.group_size + form.children === 1 ? 'person' : 'people'}
+                    {duration > 0 ? `, ${duration} days` : ''}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  {BUDGET_PRESETS.map(amt => (
-                    <button
-                      key={amt}
-                      type="button"
-                      onClick={() => setForm(f => ({ ...f, total_budget: amt, useCustomBudget: false }))}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                        !form.useCustomBudget && form.total_budget === amt
-                          ? 'border-blue-500 bg-blue-50 shadow-md'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
-                    >
-                      <div className="font-bold text-lg text-gray-900">{formatINR(amt)}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">
-                        {formatINR(Math.round(amt / form.group_size))} per person
-                      </div>
-                    </button>
-                  ))}
+                  {BUDGET_PRESETS.map(amt => {
+                    const totalPeople = Math.max(1, form.group_size + form.children)
+                    return (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, total_budget: amt, useCustomBudget: false }))}
+                        className={`p-4 rounded-2xl border-2 text-left transition-all ${
+                          !form.useCustomBudget && form.total_budget === amt
+                            ? 'border-blue-500 bg-blue-50 shadow-md'
+                            : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
+                      >
+                        <div className="font-bold text-lg text-gray-900">{formatINR(amt)}</div>
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          {formatINR(Math.round(amt / totalPeople))} per person
+                        </div>
+                      </button>
+                    )
+                  })}
                   <button
                     type="button"
                     onClick={() => setForm(f => ({ ...f, useCustomBudget: true }))}
@@ -1057,18 +1110,18 @@ function NewTripForm() {
                   </div>
                 )}
 
-                {form.total_budget > 0 && duration > 0 && (
+                {form.total_budget > 0 && (
                   <div className="bg-gray-50 rounded-xl p-4 grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <div className="text-gray-500">Per person</div>
                       <div className="font-bold text-gray-900 text-lg">
-                        {formatINR(Math.round(form.total_budget / form.group_size))}
+                        {formatINR(Math.round(form.total_budget / Math.max(1, form.group_size + form.children)))}
                       </div>
                     </div>
                     <div>
                       <div className="text-gray-500">Per day</div>
                       <div className="font-bold text-gray-900 text-lg">
-                        {formatINR(Math.round(form.total_budget / duration))}
+                        {duration > 0 ? formatINR(Math.round(form.total_budget / duration)) : '—'}
                       </div>
                     </div>
                   </div>
