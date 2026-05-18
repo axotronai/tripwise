@@ -21,6 +21,7 @@
 export const AFF = {
   bookingCom:   process.env.NEXT_PUBLIC_BOOKING_AFF_ID      || '',
   agoda:        process.env.NEXT_PUBLIC_AGODA_AFF_ID         || '',
+  kiwi:         process.env.NEXT_PUBLIC_KIWI_AFF_ID          || '',
   makemytrip:   process.env.NEXT_PUBLIC_MMT_AFF_ID           || '',
   easemytrip:   process.env.NEXT_PUBLIC_EMT_AFF_ID           || '',
   redbus:       process.env.NEXT_PUBLIC_REDBUS_AFF_ID        || '',
@@ -79,6 +80,21 @@ export function easemytripFlightUrl(from: string, to: string, date: string, adul
 export function skyscannerFlightUrl(from: string, to: string, date: string, adults = 1) {
   const [y, m, d2] = date.split('-')
   return `https://www.skyscanner.co.in/flights/${from.toLowerCase()}/${to.toLowerCase()}/${y}${m}${d2}/?adults=${adults}&currency=INR&locale=en-IN&market=IN`
+}
+
+// Kiwi.com (TravelPayouts affiliate program)
+// Affiliate ID goes in the `affilid` query param
+export function kiwiFlightUrl(from: string, to: string, date: string, adults = 1, tripType: 'one-way' | 'round' = 'one-way') {
+  const fromSlug = from.toLowerCase().replace(/\s+/g, '-') + '-india'
+  const toSlug   = to.toLowerCase().replace(/\s+/g, '-')   + '-india'
+  const p = new URLSearchParams()
+  p.set('adults', String(adults))
+  p.set('currency', 'INR')
+  if (AFF.kiwi) p.set('affilid', AFF.kiwi)
+  const path = tripType === 'round'
+    ? `https://www.kiwi.com/en/search/results/${fromSlug}/${toSlug}/${date}/return/${date}`
+    : `https://www.kiwi.com/en/search/results/${fromSlug}/${toSlug}/${date}`
+  return `${path}?${p}`
 }
 
 // ─── Buses ────────────────────────────────────────────────────────────────────

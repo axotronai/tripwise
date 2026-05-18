@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { kiwiFlightUrl, bookingComUrl } from '@/lib/affiliates'
 
 /* ─── Static Data ──────────────────────────────────────────────────── */
 
@@ -125,18 +126,13 @@ export default function HomePage() {
       const from = flFrom || 'Delhi'
       const to   = flTo   || 'Goa'
       const date = flDate || new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0]
-      const fromSlug = from.toLowerCase().replace(/\s+/g, '-') + '-india'
-      const toSlug   = to.toLowerCase().replace(/\s+/g, '-')   + '-india'
-      const kiwiUrl  = `https://www.kiwi.com/en/search/results/${fromSlug}/${toSlug}/${date}`
-      window.open(kiwiUrl, '_blank', 'noopener')
+      window.open(kiwiFlightUrl(from, to, date, parseInt(flTravellers) || 1, flType), '_blank', 'noopener')
 
     } else if (tab === 'hotels') {
       const city     = htCity     || 'Goa'
       const checkin  = htCheckin  || new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0]
       const checkout = htCheckout || new Date(Date.now() + 9*24*60*60*1000).toISOString().split('T')[0]
-      const guests   = htGuests   || '2'
-      const bookingUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}+India&checkin=${checkin}&checkout=${checkout}&group_adults=${guests}&lang=en-gb&selected_currency=INR`
-      window.open(bookingUrl, '_blank', 'noopener')
+      window.open(bookingComUrl(city + ' India', checkin, checkout, parseInt(htGuests) || 2), '_blank', 'noopener')
 
     } else if (tab === 'trains') {
       const params = new URLSearchParams()

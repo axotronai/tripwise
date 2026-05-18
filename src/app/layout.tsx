@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/layout/Navbar";
@@ -77,6 +78,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className={`${inter.className} min-h-full flex flex-col bg-gray-50`}>
+        {/* TravelPayouts affiliate tracking — fires on every page */}
+        <Script
+          id="travelpayouts-tracker"
+          src="https://tp-em.com/NTMwMjE2.js?t=530216"
+          strategy="afterInteractive"
+        />
         <ServiceWorkerRegistrar />
         <Navbar />
         <main className="flex-1">{children}</main>

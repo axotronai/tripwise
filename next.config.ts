@@ -45,16 +45,16 @@ const nextConfig: NextConfig = {
             key:   'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              // Scripts: self + inline (needed for Next.js hydration) + eval for maps
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              // Scripts: self + inline (needed for Next.js hydration) + eval for maps + TravelPayouts
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://tp-em.com",
               // Styles: self + inline (Tailwind)
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               // Fonts
               "font-src 'self' https://fonts.gstatic.com",
               // Images: self + Supabase + Unsplash + Google + tile servers
               "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://lh3.googleusercontent.com https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com",
-              // API calls: self + Supabase + Amadeus + RapidAPI + Groq + OpenMeteo
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://test.api.amadeus.com https://irctc1.p.rapidapi.com https://api.groq.com https://api.open-meteo.com",
+              // API calls: self + Supabase + Amadeus + RapidAPI + Groq + OpenMeteo + TravelPayouts
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://test.api.amadeus.com https://irctc1.p.rapidapi.com https://api.groq.com https://api.open-meteo.com https://tp-em.com https://*.travelpayouts.com",
               // Frames: none
               "frame-src 'none'",
               // Workers (Next.js service worker)
