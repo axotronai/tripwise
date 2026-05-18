@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import fs from 'fs'
 import path from 'path'
 import Link from 'next/link'
@@ -47,6 +48,47 @@ function getFallback(slug: string): Destination {
   }
 }
 
+/**
+ * Pre-render all known destination pages at build time.
+ * Unknown slugs (future destinations added via admin) are rendered on-demand.
+ */
+export async function generateStaticParams() {
+  const destinations = readDestinations()
+  return Object.keys(destinations).map(slug => ({ slug }))
+}
+
+export const dynamicParams = true // allow unknown slugs to be rendered on-demand
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
+  const { slug } = await params
+  const destinations = readDestinations()
+  const dest = destinations[slug.toLowerCase()] ?? getFallback(slug)
+  const description = dest.description.slice(0, 160)
+  const title = `${dest.name} Trip Guide — Best Time, Hotels & Itinerary`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://axozen.com'}/destinations/${slug}`,
+      images: dest.photo ? [{ url: dest.photo, alt: dest.name }] : [],
+    },
+    twitter: {
+      card:        'summary_large_image',
+      title,
+      description,
+      images:      dest.photo ? [dest.photo] : [],
+    },
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://axozen.com'}/destinations/${slug}`,
+    },
+  }
+}
+
 export default async function DestinationPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const destinations = readDestinations()
@@ -55,7 +97,8 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
   const cookieStore = await cookies()
   const isAdmin = cookieStore.get('admin_ui')?.value === '1'
 
-  const waText = encodeURIComponent(`Check out ${dest.name} on TripWise! Plan your trip free: https://tripwise.in/destinations/${slug}`)
+  const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://axozen.com'
+  const waText = encodeURIComponent(`Check out ${dest.name} on TripWise! Plan your trip free: ${SITE}/destinations/${slug}`)
 
   return (
     <div className="min-h-screen bg-gray-50">

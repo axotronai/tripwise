@@ -117,52 +117,73 @@ const CITY_COORDS: Record<string, [number, number]> = {
   'Raipur':        [21.2514,  81.6296],
 }
 
-// Module-level cache so re-mounting doesn't re-fetch
+// Module-level result cache — survives re-mounts and prevents duplicate fetches
 const weatherCache = new Map<string, WeatherData>()
 
+// In-flight promise cache — if two components mount at the same time with the
+// same city, only ONE fetch fires; both components wait on the same promise.
+const inFlight = new Map<string, Promise<WeatherData | null>>()
+
+async function fetchWeather(city: string, key: string, coords: [number, number]): Promise<WeatherData | null> {
+  const [lat, lng] = coords
+  try {
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Asia%2FKolkata&forecast_days=7`,
+      { next: { revalidate: 3600 } }
+    )
+    if (!res.ok) return null
+    const json = await res.json()
+    const days: WeatherDay[] = json.daily.time.map((date: string, i: number) => ({
+      date,
+      max_temp:    Math.round(json.daily.temperature_2m_max[i]),
+      min_temp:    Math.round(json.daily.temperature_2m_min[i]),
+      weathercode: json.daily.weathercode[i],
+    }))
+    const result: WeatherData = { city, days }
+    weatherCache.set(key, result)
+    return result
+  } finally {
+    inFlight.delete(key)
+  }
+}
+
 export function useWeather(city: string) {
-  const [data, setData]       = useState<WeatherData | null>(() => weatherCache.get(city) ?? null)
+  // Normalised key for cache lookups
+  const key = city.toLowerCase().trim()
+
+  const [data, setData]       = useState<WeatherData | null>(() => weatherCache.get(key) ?? null)
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState(false)
 
   useEffect(() => {
     if (!city) return
-    if (weatherCache.has(city)) {
-      setData(weatherCache.get(city)!)
+    if (weatherCache.has(key)) {
+      setData(weatherCache.get(key)!)
       return
     }
 
-    // Try exact match first, then case-insensitive
-    const key = Object.keys(CITY_COORDS).find(
-      k => k.toLowerCase() === city.toLowerCase()
+    // Resolve coordinates — exact match first, then case-insensitive
+    const coordKey = Object.keys(CITY_COORDS).find(
+      k => k.toLowerCase() === key
     )
-    const coords = key ? CITY_COORDS[key] : null
+    const coords = coordKey ? CITY_COORDS[coordKey] : null
     if (!coords) return  // Unknown city — widget stays hidden
 
     setLoading(true)
     setError(false)
-    const [lat, lng] = coords
-    fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Asia%2FKolkata&forecast_days=7`
-    )
-      .then(r => {
-        if (!r.ok) throw new Error('Weather fetch failed')
-        return r.json()
-      })
-      .then(json => {
-        const days: WeatherDay[] = json.daily.time.map((date: string, i: number) => ({
-          date,
-          max_temp: Math.round(json.daily.temperature_2m_max[i]),
-          min_temp: Math.round(json.daily.temperature_2m_min[i]),
-          weathercode: json.daily.weathercode[i],
-        }))
-        const result: WeatherData = { city, days }
-        weatherCache.set(city, result)
-        setData(result)
+
+    // Reuse an existing in-flight request for the same city
+    const promise = inFlight.get(key) ?? fetchWeather(city, key, coords)
+    if (!inFlight.has(key)) inFlight.set(key, promise)
+
+    promise
+      .then(result => {
+        if (result) setData(result)
+        else setError(true)
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false))
-  }, [city])
+  }, [city, key])
 
   return {
     data,

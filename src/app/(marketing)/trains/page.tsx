@@ -92,7 +92,7 @@ function SkeletonCard() {
   )
 }
 
-function TrainCard({ train }: { train: Train }) {
+function TrainCard({ train, isMock }: { train: Train; isMock: boolean }) {
   const typeColor = TYPE_COLORS[train.type] ?? TYPE_COLORS.Express
   return (
     <div className="bg-white rounded-2xl border border-gray-200 hover:shadow-md transition-shadow p-5">
@@ -101,16 +101,27 @@ function TrainCard({ train }: { train: Train }) {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm text-gray-500 font-mono">{train.number}</span>
             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${typeColor}`}>{train.type}</span>
+            {isMock && <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Sample</span>}
           </div>
           <h3 className="text-lg font-bold text-gray-900 mt-0.5">{train.name}</h3>
         </div>
-        <Button
-          onClick={() => window.open('https://www.irctc.co.in/nget/train-search', '_blank', 'noopener')}
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-1.5 shrink-0"
-          size="sm"
-        >
-          Book on IRCTC <ExternalLink className="h-3.5 w-3.5" />
-        </Button>
+        {isMock ? (
+          <a
+            href="https://www.irctc.co.in/nget/train-search"
+            target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold hover:bg-amber-100 transition-colors shrink-0"
+          >
+            Search on IRCTC <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        ) : (
+          <Button
+            onClick={() => window.open('https://www.irctc.co.in/nget/train-search', '_blank', 'noopener')}
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-1.5 shrink-0"
+            size="sm"
+          >
+            Book on IRCTC <ExternalLink className="h-3.5 w-3.5" />
+          </Button>
+        )}
       </div>
 
       <div className="mt-4 flex items-center gap-3 flex-wrap">
@@ -280,9 +291,18 @@ function TrainsContent() {
         )}
 
         {isMock && searched && !fetchErr && (
-          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs rounded-xl px-4 py-3">
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            Showing sample trains — live data coming soon. Book on IRCTC for real availability.
+          <div className="flex items-start gap-3 bg-amber-50 border-2 border-amber-300 text-amber-800 rounded-xl px-4 py-4">
+            <AlertCircle className="h-5 w-5 shrink-0 text-amber-500 mt-0.5" />
+            <div>
+              <p className="font-semibold text-sm">Sample data — not real availability</p>
+              <p className="text-xs mt-0.5 text-amber-700">
+                Live IRCTC data requires an API key. These trains are illustrative only.{' '}
+                <a href="https://www.irctc.co.in/nget/train-search" target="_blank" rel="noopener noreferrer"
+                  className="underline font-semibold hover:text-amber-900">
+                  Check real availability on IRCTC →
+                </a>
+              </p>
+            </div>
           </div>
         )}
 
@@ -318,7 +338,7 @@ function TrainsContent() {
               </Badge>
             </div>
             {trains.map(train => (
-              <TrainCard key={train.number} train={train} />
+              <TrainCard key={train.number} train={train} isMock={isMock} />
             ))}
           </>
         )}
@@ -334,9 +354,28 @@ function TrainsContent() {
   )
 }
 
+function TrainsPageSkeleton() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white border-b shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="h-8 w-64 bg-gray-200 rounded animate-pulse mb-6" />
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            {[1,2,3].map(i => <div key={i} className="h-12 bg-gray-200 rounded-lg animate-pulse" />)}
+          </div>
+          <div className="h-12 bg-gray-200 rounded-xl animate-pulse" />
+        </div>
+      </div>
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-4">
+        {[1,2,3].map(i => <SkeletonCard key={i} />)}
+      </div>
+    </div>
+  )
+}
+
 export default function TrainsPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<TrainsPageSkeleton />}>
       <TrainsContent />
     </Suspense>
   )

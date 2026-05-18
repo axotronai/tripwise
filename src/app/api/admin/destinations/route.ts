@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import fs from 'fs'
 import path from 'path'
+import crypto from 'crypto'
 
-const SESSION_TOKEN = process.env.ADMIN_SESSION_SECRET ?? 'tripwise-admin-secret-2025'
+// Use env var only — no insecure fallback (fixed from hard-coded default)
+function getSessionToken() {
+  return process.env.ADMIN_SESSION_SECRET ?? null
+}
+
 const DATA_PATH = path.join(process.cwd(), 'src/data/destinations.json')
 
 function readDestinations(): Record<string, unknown> {
@@ -14,13 +19,35 @@ function readDestinations(): Record<string, unknown> {
   }
 }
 
+/**
+ * Atomic write — writes to a temp file first then renames over the target.
+ * Prevents data corruption if the process crashes mid-write.
+ */
 function writeDestinations(data: Record<string, unknown>) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2))
+  const dir     = path.dirname(DATA_PATH)
+  const tmpPath = path.join(dir, `.destinations-${crypto.randomUUID()}.tmp`)
+  try {
+    fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), { encoding: 'utf-8', flag: 'w' })
+    fs.renameSync(tmpPath, DATA_PATH)
+  } catch (err) {
+    // Clean up temp file if rename failed
+    try { fs.unlinkSync(tmpPath) } catch { /* ignore */ }
+    throw err
+  }
 }
 
 async function isAdmin() {
+  const token = getSessionToken()
+  if (!token) return false
   const cookieStore = await cookies()
-  return cookieStore.get('admin_session')?.value === SESSION_TOKEN
+  const sessionValue = cookieStore.get('admin_session')?.value
+  if (!sessionValue) return false
+  // Constant-time comparison
+  try {
+    return crypto.timingSafeEqual(Buffer.from(sessionValue), Buffer.from(token))
+  } catch {
+    return false
+  }
 }
 
 export async function GET(req: NextRequest) {
@@ -38,7 +65,9 @@ export async function PATCH(req: NextRequest) {
   }
   const body: Record<string, unknown> = await req.json()
   const { slug, ...fields } = body as { slug: string } & Record<string, unknown>
-  if (!slug) return NextResponse.json({ error: 'Missing slug' }, { status: 400 })
+  if (!slug || typeof slug !== 'string' || !/^[a-z0-9-]+$/.test(slug)) {
+    return NextResponse.json({ error: 'Invalid or missing slug' }, { status: 400 })
+  }
 
   const destinations = readDestinations()
   destinations[slug] = { ...(destinations[slug] as Record<string, unknown> ?? {}), ...fields }
@@ -52,7 +81,9 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const slug = req.nextUrl.searchParams.get('slug')
-  if (!slug) return NextResponse.json({ error: 'Missing slug' }, { status: 400 })
+  if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
+    return NextResponse.json({ error: 'Invalid or missing slug' }, { status: 400 })
+  }
 
   const destinations = readDestinations()
   delete destinations[slug]

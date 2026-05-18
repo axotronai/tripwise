@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server-admin'
+import { requireTripOwner } from '@/lib/supabase/auth-guard'
 
 type Ctx = { params: Promise<{ id: string }> }
 
 export async function GET(_: NextRequest, { params }: Ctx) {
   const { id } = await params
+
+  const guard = await requireTripOwner(id)
+  if (guard.error) return guard.error
+
   const admin = createAdminClient()
 
   const { data, error } = await admin
@@ -19,6 +24,10 @@ export async function GET(_: NextRequest, { params }: Ctx) {
 
 export async function POST(req: NextRequest, { params }: Ctx) {
   const { id } = await params
+
+  const guard = await requireTripOwner(id)
+  if (guard.error) return guard.error
+
   const body = await req.json()
   const { category, amount, note, date } = body
 
@@ -29,7 +38,13 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('expenses')
-    .insert({ trip_id: id, category, amount: Number(amount), note: note || null, date: date || new Date().toISOString().split('T')[0] })
+    .insert({
+      trip_id:  id,
+      category,
+      amount:   Number(amount),
+      note:     note || null,
+      date:     date || new Date().toISOString().split('T')[0],
+    })
     .select()
     .single()
 
@@ -39,6 +54,10 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {
   const { id: tripId } = await params
+
+  const guard = await requireTripOwner(tripId)
+  if (guard.error) return guard.error
+
   const { searchParams } = new URL(req.url)
   const expenseId = searchParams.get('expenseId')
 

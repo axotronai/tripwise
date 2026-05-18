@@ -43,6 +43,7 @@ export interface WizardPlace {
   best_time: string
   rating: number
   location: string
+  is_must_visit?: boolean
 }
 
 export interface WizardRestaurant {

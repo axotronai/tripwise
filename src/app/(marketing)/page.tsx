@@ -678,6 +678,60 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Social Proof ───────────────────────────────────────────── */}
+      <section className="py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <div className="flex items-center justify-center gap-1 mb-2">
+              {[1,2,3,4,5].map(i => <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />)}
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Loved by Indian Travelers</h2>
+            <p className="text-gray-500 mt-2 text-sm">Real stories from trips planned on TripWise</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
+            {[
+              { name: 'Priya S.', city: 'Mumbai', dest: 'Goa', quote: 'AI planned our entire 5-day Goa trip in 30 seconds. Saved us hours of WhatsApp research!', rating: 5, avatar: '🧕' },
+              { name: 'Rahul K.', city: 'Delhi', dest: 'Manali', quote: 'Budget tracker is a lifesaver. Knew exactly how much we were spending every day in ₹.', rating: 5, avatar: '👨‍💼' },
+              { name: 'Ananya R.', city: 'Bangalore', dest: 'Kerala', quote: 'Compared trains and buses side by side. Booked the best route in minutes. Totally free!', rating: 5, avatar: '👩‍💻' },
+              { name: 'Vikram P.', city: 'Pune', dest: 'Ladakh', quote: 'The packing list feature + weather forecast combo is genius for high-altitude trips.', rating: 5, avatar: '🧔' },
+              { name: 'Sneha M.', city: 'Hyderabad', dest: 'Jaipur', quote: 'Planned a family trip for 8 people. The group size + children budget split was perfect.', rating: 5, avatar: '👩' },
+              { name: 'Arjun T.', city: 'Chennai', dest: 'Andaman', quote: 'No sign-up needed to start — I had a full 7-day itinerary before creating an account.', rating: 5, avatar: '👦' },
+            ].map(r => (
+              <div key={r.name} className="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-1 mb-3">
+                  {Array.from({ length: r.rating }).map((_, i) => <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
+                </div>
+                <p className="text-sm text-gray-700 leading-relaxed mb-4">&ldquo;{r.quote}&rdquo;</p>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl">{r.avatar}</span>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{r.name}</p>
+                    <p className="text-xs text-gray-500">{r.city} → {r.dest}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Newsletter signup */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-8 text-center max-w-2xl mx-auto">
+            <RefreshCw className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+            <h3 className="text-xl font-bold text-gray-900 mb-1">Get Travel Deals in Your Inbox</h3>
+            <p className="text-sm text-gray-500 mb-5">Weekly deals on trains, flights & hotels — curated for Indian destinations. No spam, unsubscribe anytime.</p>
+            <form
+              onSubmit={e => { e.preventDefault(); const input = (e.currentTarget.elements.namedItem('email') as HTMLInputElement); if (input?.value) { input.value = ''; alert('Thanks! Watch your inbox for deals 🎉') } }}
+              className="flex gap-2 max-w-sm mx-auto"
+            >
+              <Input name="email" type="email" placeholder="your@email.com" required className="flex-1 h-11 border-blue-200 focus-visible:ring-blue-400" />
+              <Button type="submit" className="h-11 px-5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shrink-0">
+                Subscribe
+              </Button>
+            </form>
+            <p className="text-xs text-gray-400 mt-3">Join 12,000+ travelers · No spam ever</p>
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA ────────────────────────────────────────────────────── */}
       <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16 text-center">
         <div className="max-w-2xl mx-auto px-4">

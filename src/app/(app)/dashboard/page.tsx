@@ -37,6 +37,8 @@ export default function DashboardPage() {
   const [loading, setLoading]   = useState(true)
   const [fetchError, setFetchError] = useState(false)
   const [duplicating, setDuplicating] = useState<string | null>(null)
+  const [showAll, setShowAll]   = useState(false)
+  const PAGE_SIZE = 9
 
   useEffect(() => {
     fetch('/api/trips')
@@ -168,7 +170,7 @@ export default function DashboardPage() {
       {/* Trip grid */}
       {!loading && trips.length > 0 && (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {trips.map(trip => {
+          {(showAll ? trips : trips.slice(0, PAGE_SIZE)).map(trip => {
             const status   = tripStatus(trip)
             const gradient = DEST_GRADIENT[trip.destination] || DEFAULT_GRADIENT
             return (
@@ -241,6 +243,18 @@ export default function DashboardPage() {
               </Card>
             )
           })}
+        </div>
+      )}
+
+      {/* Load more / show less */}
+      {!loading && trips.length > PAGE_SIZE && (
+        <div className="text-center pt-2">
+          <button
+            onClick={() => setShowAll(v => !v)}
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium underline underline-offset-2"
+          >
+            {showAll ? `Show fewer (${PAGE_SIZE})` : `Show all ${trips.length} trips`}
+          </button>
         </div>
       )}
     </div>

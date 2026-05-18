@@ -15,7 +15,13 @@ export function generateDays(startDate: string, endDate: string, destination: st
   }))
 }
 
-export function calcBudgetBreakdown(totalBudget: number, style: TravelStyle, days: number, groupSize: number): BudgetBreakdown {
+export function calcBudgetBreakdown(
+  totalBudget: number,
+  style: TravelStyle,
+  days: number,
+  groupSize: number,
+  children = 0,
+): BudgetBreakdown {
   const allocations = {
     budget: { transport: 0.25, hotels: 0.30, food: 0.25, activities: 0.10, buffer: 0.10 },
     comfort: { transport: 0.25, hotels: 0.35, food: 0.20, activities: 0.12, buffer: 0.08 },
@@ -24,6 +30,7 @@ export function calcBudgetBreakdown(totalBudget: number, style: TravelStyle, day
     family: { transport: 0.25, hotels: 0.38, food: 0.22, activities: 0.10, buffer: 0.05 },
   }
   const alloc = allocations[style]
+  const totalPeople = Math.max(1, groupSize + children)
   return {
     total: totalBudget,
     transport: Math.round(totalBudget * alloc.transport),
@@ -32,6 +39,7 @@ export function calcBudgetBreakdown(totalBudget: number, style: TravelStyle, day
     activities: Math.round(totalBudget * alloc.activities),
     buffer: Math.round(totalBudget * alloc.buffer),
     spent: 0,
+    perPerson: Math.round(totalBudget / totalPeople),
   }
 }
 

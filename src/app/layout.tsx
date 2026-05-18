@@ -8,14 +8,57 @@ import ServiceWorkerRegistrar from "@/components/layout/ServiceWorkerRegistrar";
 
 const inter = Inter({ subsets: ["latin"] });
 
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://axozen.com'
+
 export const metadata: Metadata = {
-  title: "TripWise — Plan Your India Trip",
-  description: "All-in-one India trip planner. Build itineraries, find trains & flights, track budget — powered by AI.",
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: 'TripWise — AI Trip Planner for India',
+    template: '%s | TripWise',
+  },
+  description: 'Plan your perfect India trip with AI. Build day-by-day itineraries, search trains & flights, compare hotels, and track budget in INR — all free.',
+  keywords: ['India trip planner', 'travel itinerary', 'train booking', 'flight search', 'hotel search', 'budget tracker', 'AI travel'],
+  authors: [{ name: 'TripWise' }],
+  creator: 'TripWise',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'TripWise',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_IN',
+    url: BASE_URL,
+    siteName: 'TripWise',
+    title: 'TripWise — AI Trip Planner for India',
+    description: 'Plan your perfect India trip with AI. Free day-by-day itineraries, train & flight search, hotel finder, and budget tracking.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'TripWise — AI Trip Planner for India',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TripWise — AI Trip Planner for India',
+    description: 'Plan your perfect India trip with AI. Free itineraries, train & flight search, hotel finder.',
+    images: ['/og-image.png'],
+    creator: '@tripwisein',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 

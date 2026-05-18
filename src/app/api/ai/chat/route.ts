@@ -87,7 +87,7 @@ RULES:
 
   try {
     const completion = await getGroq().chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'llama-3.1-8b-instant', // conversational — 10x faster TTFB, quality sufficient
       messages: [
         { role: 'system', content: systemPrompt },
         ...apiMessages.slice(-14),

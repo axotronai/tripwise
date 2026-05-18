@@ -3,6 +3,25 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/server-admin'
 import { generateDays } from '@/lib/utils/trip'
 
+// ─── Simple in-memory rate limiter for guest trip creation ───────────────────
+// Resets between serverless cold-starts — that's fine; the goal is preventing
+// rapid automated abuse within a single session, not cross-restart tracking.
+const GUEST_RATE: Map<string, { count: number; resetAt: number }> = new Map()
+const GUEST_MAX  = 3    // max guest trips per IP per window
+const WINDOW_MS  = 60 * 60 * 1000  // 1 hour
+
+function checkGuestRateLimit(ip: string): boolean {
+  const now  = Date.now()
+  const entry = GUEST_RATE.get(ip)
+  if (!entry || now > entry.resetAt) {
+    GUEST_RATE.set(ip, { count: 1, resetAt: now + WINDOW_MS })
+    return true
+  }
+  if (entry.count >= GUEST_MAX) return false
+  entry.count++
+  return true
+}
+
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -31,7 +50,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const body = await req.json()
-  const { destination, start_city, start_date, end_date, total_days, total_budget, travel_style, group_size, children } = body
+  const { destination, start_city, start_date, end_date, total_days, total_budget, travel_style, group_size, children, diet } = body
 
   const admin = createAdminClient()
 
@@ -39,6 +58,15 @@ export async function POST(req: NextRequest) {
   let userId = user?.id
   let guestUserId: string | undefined
   if (!userId) {
+    // Rate-limit guest trip creation by IP
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
+    if (!checkGuestRateLimit(ip)) {
+      return NextResponse.json(
+        { error: 'Too many guest trips created. Please sign in or try again later.' },
+        { status: 429 }
+      )
+    }
+
     const guestEmail = `guest-${crypto.randomUUID()}@tripwise.guest`
     const { data: anonData, error: anonErr } = await admin.auth.admin.createUser({
       email: guestEmail,
@@ -53,8 +81,8 @@ export async function POST(req: NextRequest) {
   }
 
   const tripData = {
-    user_id: userId,
-    title: `${destination} Trip`,
+    user_id:      userId,
+    title:        `${destination} Trip`,
     destination,
     start_city,
     start_date,
@@ -63,14 +91,15 @@ export async function POST(req: NextRequest) {
     total_budget,
     travel_style,
     group_size,
-    children: children ?? 0,
+    children:     children ?? 0,
+    diet:         diet ?? 'any',
   }
 
   let { data: trip, error: tripError } = await admin.from('trips').insert(tripData).select().single()
-  if (tripError && tripError.message.includes('children')) {
-    // children column not yet added — run schema-update.sql in Supabase to fix
-    const { children: _c, ...tripDataWithoutChildren } = tripData
-    const res2 = await admin.from('trips').insert(tripDataWithoutChildren).select().single()
+  if (tripError && (tripError.message.includes('children') || tripError.message.includes('diet') || tripError.message.includes('ai_insights'))) {
+    // Graceful fallback: strip columns that haven't been added to the DB schema yet
+    const { children: _c, diet: _d, ai_insights: _ai, ...tripDataCore } = tripData as typeof tripData & { ai_insights?: string }
+    const res2 = await admin.from('trips').insert(tripDataCore).select().single()
     trip = res2.data
     tripError = res2.error
   }

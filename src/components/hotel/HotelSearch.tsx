@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Star, MapPin, Wifi, Coffee, Waves, Filter, ArrowUpDown, CheckCircle2, X, Hotel as HotelIcon } from 'lucide-react'
+import { Star, MapPin, Wifi, Coffee, Waves, Filter, ArrowUpDown, CheckCircle2, X, Hotel as HotelIcon, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -26,6 +26,7 @@ interface Hotel {
   id: string; name: string; city: string; type: string
   price_per_night: number; rating: number; reviews: number
   amenities: string[]; image_gradient: string
+  map_url?: string; book_at?: string
 }
 
 type SortKey = 'price_asc' | 'price_desc' | 'rating'
@@ -49,6 +50,7 @@ interface Props {
   defaultCity?: string
   checkin?: string
   checkout?: string
+  adults?: number
   tripDays?: TripDay[]
   dayHotels?: Record<string, SelectedHotel>   // dayId → hotel
   onSelectHotelForDays?: (hotel: SelectedHotel, dayIds: string[]) => void
@@ -56,7 +58,7 @@ interface Props {
 }
 
 export default function HotelSearch({
-  defaultCity = '', checkin = '', checkout = '',
+  defaultCity = '', checkin = '', checkout = '', adults = 2,
   tripDays = [], dayHotels = {}, onSelectHotelForDays, onRemoveHotelFromDay,
 }: Props) {
   const [city, setCity]           = useState(defaultCity)
@@ -69,6 +71,7 @@ export default function HotelSearch({
   const [hotels, setHotels]       = useState<Hotel[]>([])
   const [loading, setLoading]     = useState(false)
   const [searched, setSearched]   = useState(false)
+  const [source, setSource]       = useState<string>('mock')
 
   // Day picker state
   const [pickingHotel, setPickingHotel]   = useState<Hotel | null>(null)
@@ -78,10 +81,11 @@ export default function HotelSearch({
     if (!city) { toast.error('Enter a city'); return }
     setLoading(true)
     try {
-      const p = new URLSearchParams({ city, checkin: cin, checkout: cout, maxPrice: String(maxPrice[0]), minRating: String(minRating[0]), type })
+      const p = new URLSearchParams({ city, checkin: cin, checkout: cout, maxPrice: String(maxPrice[0]), minRating: String(minRating[0]), type, adults: String(adults) })
       const res = await fetch(`/api/hotels/search?${p}`)
       const data = await res.json()
       setHotels(data.hotels || [])
+      setSource(data.source || 'mock')
       setSearched(true)
     } catch { toast.error('Search failed') }
     finally { setLoading(false) }
@@ -210,17 +214,31 @@ export default function HotelSearch({
                   </span>
                 ))}
               </div>
-              {onSelectHotelForDays && (
-                <Button
-                  size="sm"
-                  variant={isBooked ? 'default' : 'outline'}
-                  className={`text-xs gap-1 h-7 shrink-0 ${isBooked ? 'bg-green-600 hover:bg-green-700 border-green-600' : 'border-blue-300 text-blue-600 hover:bg-blue-50'}`}
-                  onClick={() => openDayPicker(hotel)}
-                >
-                  <HotelIcon className="h-3 w-3" />
-                  {isBooked ? `Edit (${myBookedDays.length}d)` : 'Select Hotel'}
-                </Button>
-              )}
+              <div className="flex gap-1 items-center">
+                {hotel.map_url && (
+                  <a href={hotel.map_url} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs h-7 px-2 border border-gray-200 text-gray-500 hover:text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                    <MapPin className="h-3 w-3" />Map
+                  </a>
+                )}
+                {hotel.book_at && (
+                  <a href={hotel.book_at} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs h-7 px-2 border border-blue-200 text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
+                    <ExternalLink className="h-3 w-3" />Book
+                  </a>
+                )}
+                {onSelectHotelForDays && (
+                  <Button
+                    size="sm"
+                    variant={isBooked ? 'default' : 'outline'}
+                    className={`text-xs gap-1 h-7 shrink-0 ${isBooked ? 'bg-green-600 hover:bg-green-700 border-green-600' : 'border-green-300 text-green-700 hover:bg-green-50'}`}
+                    onClick={() => openDayPicker(hotel)}
+                  >
+                    <HotelIcon className="h-3 w-3" />
+                    {isBooked ? `Edit (${myBookedDays.length}d)` : 'Select'}
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </div>
@@ -360,6 +378,13 @@ export default function HotelSearch({
                 <option value="price_desc">Price: High to Low</option>
               </select>
             </div>
+          </div>
+
+          {/* Data source badge */}
+          <div className="flex justify-end mb-1">
+            {source === 'amadeus'  && <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 border border-green-200 rounded-full px-2 py-0.5">🟢 Live · Amadeus Hotels</span>}
+            {source === 'mock'     && <span className="inline-flex items-center gap-1 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">⚠️ Sample data</span>}
+            {source === 'fallback' && <span className="inline-flex items-center gap-1 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">⚠️ Sample (API unavailable)</span>}
           </div>
 
           {sorted.length === 0 ? (

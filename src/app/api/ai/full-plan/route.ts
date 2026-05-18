@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
 import { getSeasonNote } from '@/lib/ai/season'
+import { getFestivalNote } from '@/lib/ai/festivals'
+import {
+  styleGuide, transportGuide, dietGuide, groupGuide, interestsGuide,
+  buildDayDateMap,
+  ANTI_HALLUCINATION_PLACES, ANTI_HALLUCINATION_HOTELS,
+  ANTI_HALLUCINATION_RESTAURANTS, ANTI_HALLUCINATION_TRAINS,
+  JSON_OUTPUT_RULE,
+} from '@/lib/ai/prompts'
 
 function getGroq() {
   return new Groq({ apiKey: process.env.GROQ_API_KEY })
@@ -23,102 +31,7 @@ interface FullPlanRequest {
   interests?: string[]
   diet?: 'veg' | 'nonveg' | 'jain' | 'any'
   transport_pref?: 'train' | 'flight' | 'bus' | 'road' | 'fastest' | 'cheapest'
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function styleGuide(style: string): string {
-  return (
-    ({
-      budget:
-        'hostels/dorms, street food, local buses/sleeper trains, free attractions — cut cost at every step. Prioritise value',
-      comfort:
-        '3-star hotels, AC trains or budget flights, local restaurants, mix of free and paid attractions',
-      luxury:
-        '5-star resorts, domestic flights, fine dining, private cabs, premium experiences — quality over cost',
-      adventure:
-        'camping, treks, home-stays, jeep safaris, adventure sports, hostels — outdoor-first itinerary',
-      family:
-        'family rooms, AC transport, child-friendly activities, reputed hygienic restaurants, early evenings (10pm latest)',
-    } as Record<string, string>)[style] ?? 'comfortable, value-for-money options'
-  )
-}
-
-function transportGuide(pref: string): string {
-  return (
-    ({
-      train:
-        'PRIORITISE trains (especially sleeper/AC overnight trains — they save a hotel night and are iconic India experiences). Use IRCTC train names and numbers.',
-      flight:
-        'Prefer flights for legs > 600km. Name specific airline + approximate timing. Include airport transit time in day planning.',
-      bus:
-        'Prefer state-run and reputed private buses (RedBus operators). Budget-friendly. Good for distances up to 400km overnight.',
-      road:
-        'Self-drive or hired cab road trip. Suggest scenic routes, pit stops, highway dhabas. Estimate drive time.',
-      fastest:
-        'Always pick the fastest mode regardless of cost — flights > trains > buses.',
-      cheapest:
-        'Always pick the cheapest mode — state buses > sleeper trains > budget flights.',
-    } as Record<string, string>)[pref] ?? 'trains and buses where practical'
-  )
-}
-
-function dietGuide(diet: string): string {
-  return (
-    ({
-      veg:
-        'ONLY suggest pure vegetarian restaurants. No meat, no eggs. Many Indian cities have excellent pure-veg options.',
-      nonveg:
-        'Include local non-vegetarian specialties prominently — biryani, fish curry, kebabs etc. as relevant to destination.',
-      jain:
-        'Jain food only — no root vegetables (no onion, garlic, potato, carrot, beetroot). Suggest Jain-friendly restaurants.',
-      any:
-        'Mix of vegetarian and non-vegetarian options. Highlight the best of both at each destination.',
-    } as Record<string, string>)[diet] ?? 'mix of all food options'
-  )
-}
-
-function interestsGuide(interests: string[]): string {
-  if (!interests || interests.length === 0) return ''
-  const map: Record<string, string> = {
-    beaches:      'Prioritise beach activities, sunrise/sunset spots, water-facing hotels',
-    history:      'Include forts, temples, museums, archaeological sites, heritage walks',
-    nature:       'Wildlife sanctuaries, national parks, forest treks, botanical gardens, viewpoints',
-    food:         'Food walks, local markets, iconic street food, cooking classes, famous restaurants',
-    shopping:     'Local markets, emporiums, artisan bazaars, handicraft stores',
-    adventure:    'Treks, rappelling, white-water rafting, paragliding, rock climbing, camping',
-    culture:      'Classical performances, art galleries, festivals, traditional crafts, local fairs',
-    scenic:       'Sunrise/sunset points, viewpoints, photography spots, valley overlooks',
-    nightlife:    'Live music venues, rooftop bars, night markets, late-night food streets',
-    wellness:     'Yoga retreats, Ayurveda spas, meditation centres, hot springs',
-    water_sports: 'Surfing, snorkelling, scuba, kayaking, jet skiing, parasailing',
-    cycling:      'Cycling routes, mountain bike trails, guided hike circuits',
-  }
-  return interests
-    .filter(k => map[k])
-    .map(k => `• ${map[k]}`)
-    .join('\n')
-}
-
-function groupGuide(type: string, size: number, children: number): string {
-  const childNote =
-    children > 0
-      ? ` IMPORTANT: ${children} children present — no late nights past 9pm, no risky activities, include parks/interactive museums/easy nature walks.`
-      : ''
-  return (
-    ({
-      solo:
-        `Solo traveller — suggest social activities, hostels with common areas, free walking tours.${childNote}`,
-      couple:
-        `Couple — balance romantic dinners, scenic spots, and adventure. Include at least one special experience per destination.${childNote}`,
-      family:
-        `Family of ${size} adults + ${children} children — safety first, child-friendly activities, family rooms, early check-in preference.${childNote}`,
-      friends:
-        `Friends group of ${size} — mix of activities, group-friendly restaurants, energetic pace, good for nightlife if budget allows.${childNote}`,
-      corporate:
-        `Corporate group of ${size} — reliable transport, good Wi-Fi hotels, team activity options, group dining.${childNote}`,
-    } as Record<string, string>)[type] ?? `Group of ${size} travellers.${childNote}`
-  )
+  nights_per_destination?: Record<string, number>  // user-specified nights per city
 }
 
 // ─── Schema example (inline in prompt) ───────────────────────────────────────
@@ -148,7 +61,6 @@ function buildSchemaExample(
       "nights": 3
     }`
   })
-  // Return leg (last destination back to start city)
   legs.push(`{
       "from": "${allDests[allDests.length - 1]}",
       "to": "${startCity}",
@@ -187,6 +99,7 @@ export async function POST(req: NextRequest) {
     interests = [],
     diet = 'any',
     transport_pref = 'train',
+    nights_per_destination,
   } = body
 
   if (!destination || !start_city || !start_date || !total_days || !total_budget) {
@@ -197,57 +110,70 @@ export async function POST(req: NextRequest) {
   const isMultiCity = extra_destinations.length > 0
   const dailyBudget = Math.round(total_budget / total_days)
   const totalPeople = group_size + children
-  const perPersonBudget = Math.round(total_budget / group_size)
+  // Use totalPeople (adults + children) for per-person budget — children consume budget too
+  const perPersonBudget = Math.round(total_budget / (totalPeople || 1))
+  const activityBudgetCap = Math.round(total_budget * 0.15)
 
-  // Build day-date mapping so AI is festival/weekday aware
-  const dayDates: string[] = []
-  const base = new Date(start_date)
-  for (let i = 0; i < total_days; i++) {
-    const d = new Date(base)
-    d.setDate(base.getDate() + i)
-    dayDates.push(
-      d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
-    )
-  }
-
+  const dayDates = buildDayDateMap(start_date, total_days)
   const weatherNote = getSeasonNote(destination, start_date)
-
+  const festivalNote = getFestivalNote(destination, start_date, total_days)
   const interestsBlock = interestsGuide(interests)
 
-  const prompt = `You are an expert India travel planner with deep local knowledge of trains, hotels, restaurants, and attractions across every Indian state.
+  // ─── SYSTEM PROMPT (persona + rules) ─────────────────────────────────────
+  const systemPrompt = `You are an expert India trip planner with deep local knowledge of trains, hotels, restaurants, and attractions across every Indian state and union territory.
+
+${ANTI_HALLUCINATION_PLACES}
+${ANTI_HALLUCINATION_HOTELS}
+${ANTI_HALLUCINATION_RESTAURANTS}
+${ANTI_HALLUCINATION_TRAINS}
+
+BUDGET MATH (do this before writing JSON):
+Step 1: Estimate hotel cost = nights × cost_per_night per city
+Step 2: Estimate transport = sum of all leg costs × group_size
+Step 3: Estimate food = days × daily_food_per_person × group_size
+Step 4: activities = remaining after steps 1-3 (must be ≤ ₹${activityBudgetCap})
+Step 5: buffer = total_budget - (hotels + transport + food + activities)
+ONLY then write budget_breakdown. Total MUST equal ₹${total_budget}.
+
+STRICT RULES:
+1. ${JSON_OUTPUT_RULE}
+2. Exactly ${total_days} day objects — no more, no less.
+3. Every day MUST have 3–5 activities with realistic time gaps.
+4. Total activity costs across ALL days ≤ ₹${activityBudgetCap}. Include ≥1 free activity per day.
+5. budget_breakdown.total MUST equal exactly ₹${total_budget}.
+6. Hotels: same hotel for ALL consecutive nights in same city. REAL hotel names only.
+7. Restaurants in food_plan: REAL named restaurants or famous food streets — never "local restaurant".
+8. Trains: REAL IRCTC train names. Omit number if not certain.
+9. Flights: real airlines (IndiGo, Air India, SpiceJet). Include flight code if known.
+10. Route: include BOTH outbound legs AND final return leg (last city → ${start_city}).
+11. If Day 1 involves arriving by train/flight: only 2–3 activities starting AFTER arrival time.
+12. Activity type must be one of: sightseeing, food, adventure, culture, beach, shopping, rest, nature, wellness, departure.
+13. Day themes must reflect the traveller's interests.
+14. quick_tips: destination-specific and actionable — no generic advice.
+15. Children rule: if children > 0 — no late nights past 9pm, no risky activities.`
+
+  // ─── USER PROMPT (trip-specific data) ─────────────────────────────────────
+  const userPrompt = `Plan a complete ${total_days}-day trip.
 
 TRIP REQUEST:
 - From: ${start_city}
 - Destination${isMultiCity ? 's' : ''}: ${allDestinations.join(' → ')}
-- Travel dates: ${start_date} (${total_days} days total)
+- Travel dates: ${start_date} (${total_days} days)
 - Group: ${groupGuide(group_type, group_size, children)}
 - Group size: ${totalPeople} people (${group_size} adult${group_size !== 1 ? 's' : ''}${children > 0 ? `, ${children} child${children !== 1 ? 'ren' : ''}` : ''})
-- Total budget: ₹${total_budget.toLocaleString('en-IN')} (₹${dailyBudget.toLocaleString('en-IN')}/day average, ₹${perPersonBudget.toLocaleString('en-IN')}/person)
+- Total budget: ₹${total_budget.toLocaleString('en-IN')} (₹${dailyBudget.toLocaleString('en-IN')}/day avg, ₹${perPersonBudget.toLocaleString('en-IN')}/person)
 - Travel style: ${travel_style} — ${styleGuide(travel_style)}
 - Transport preference: ${transportGuide(transport_pref)}
-- Food preference: ${dietGuide(diet)}
-${interests.length > 0 ? `\nINTEREST-BASED PRIORITIES (incorporate heavily into activity selection):\n${interestsBlock}` : ''}
+- Food: ${dietGuide(diet)}
+${interests.length > 0 ? `\nINTEREST PRIORITIES:\n${interestsBlock}` : ''}
 ${weatherNote ? `\nSEASON/WEATHER: ${weatherNote}` : ''}
+${festivalNote ? `\nFESTIVAL/EVENT CONTEXT: ${festivalNote}` : ''}
+${nights_per_destination && Object.keys(nights_per_destination).length > 0
+  ? `\nPER-CITY NIGHTS (USER-SPECIFIED — follow exactly):\n${Object.entries(nights_per_destination).map(([c, n]) => `  ${c}: ${n} night${n !== 1 ? 's' : ''}`).join('\n')}`
+  : ''}
 
-DAY DATE MAPPING (use for weekday/festival/closure awareness):
+DAY DATES (use for closure/festival awareness):
 ${dayDates.map((d, i) => `  Day ${i + 1}: ${d}`).join('\n')}
-
-STRICT RULES:
-1. Return ONLY valid JSON — no markdown, no extra text, no code fences.
-2. Exactly ${total_days} day objects — no more, no less.
-3. Every day MUST have 3–4 activities with realistic time gaps (account for travel time between locations).
-4. Activity costs across ALL ${total_days} days must NOT exceed ₹${Math.round(total_budget * 0.15).toLocaleString('en-IN')} total. Include at least 1 free activity per day.
-5. budget_breakdown MUST add up to exactly ₹${total_budget.toLocaleString('en-IN')}. Compute real planned costs — not guesses.
-6. Hotels: suggest the SAME hotel for all consecutive nights in the same city. Use REAL hotel names (e.g., "Zostel Goa", "Hotel Sarovar Premiere Jaipur", "Taj Lake Palace Udaipur").
-7. Restaurants: REAL named restaurants or famous food streets — never "local restaurant" or generic names.
-8. Trains: use REAL Indian train names and numbers (e.g., "Rajdhani Express 12951"). Book at irctc.co.in.
-9. Flights: name real airlines (IndiGo, Air India, SpiceJet, Vistara). Give flight codes if known.
-10. Route: include BOTH outbound legs (${start_city} → every destination city) AND the final return leg (last city → ${start_city}).
-11. For each destination city in hotels: include the city name as the key exactly as spelled above.
-12. If Day 1 involves arrival by train/flight, only plan 2–3 activities starting AFTER arrival time.
-13. Activity type must be one of: sightseeing, food, adventure, culture, beach, shopping, rest, nature, wellness, departure.
-14. Day themes must reflect the traveller's interests (e.g., if beach interest, Day 1 theme = "Beach Arrival & Sunset").
-15. quick_tips must be destination-specific and actionable — no generic travel advice.
 
 Return JSON exactly matching this schema:
 
@@ -272,14 +198,13 @@ Return JSON exactly matching this schema:
       "hotel_suggestion": "Hotel Name, Area — brief reason",
       "hotel_cost_per_night": 3500,
       "food_plan": "Breakfast: [Named place] | Lunch: [Named place] | Dinner: [Named place]",
-      "local_tip": "Specific insider tip for this city — not generic",
+      "local_tip": "Specific insider tip for this city",
       "activities": [
         {
           "name": "Activity name with emoji prefix",
-          "description": "What you do here and why it is worth visiting — 1-2 specific sentences",
-          "time": "09:00",
-          "end_time": "11:30",
+          "description": "What you do here and why — 1-2 specific sentences",
           "start_time": "09:00",
+          "end_time": "11:30",
           "cost": 200,
           "type": "sightseeing",
           "location": "Exact landmark or street, ${destination}",
@@ -305,14 +230,17 @@ Return JSON exactly matching this schema:
   ]
 }
 
-Generate the complete ${total_days}-day plan now. Remember: ONLY JSON output, all ${total_days} days, real places, real hotels, real transport.`
+Generate the complete ${total_days}-day plan now.`
 
   const maxRetries = 2
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       const completion = await getGroq().chat.completions.create({
         model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: prompt }],
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: userPrompt },
+        ],
         temperature: attempt === 0 ? 0.7 : 0.4,
         max_tokens: 8000,
         response_format: { type: 'json_object' },
@@ -321,7 +249,6 @@ Generate the complete ${total_days}-day plan now. Remember: ONLY JSON output, al
       const content = completion.choices[0].message.content || '{}'
       const plan = JSON.parse(content)
 
-      // Validate required shape
       if (!plan.days || !Array.isArray(plan.days) || plan.days.length === 0) {
         throw new Error('Invalid plan: missing days array')
       }
@@ -329,7 +256,7 @@ Generate the complete ${total_days}-day plan now. Remember: ONLY JSON output, al
         throw new Error('Invalid plan: missing budget_breakdown')
       }
 
-      // Normalise activity fields: ensure both time/start_time are set
+      // Normalise activity fields: ensure start_time is always set
       plan.days = plan.days.map(
         (day: {
           day_number: number
@@ -353,28 +280,34 @@ Generate the complete ${total_days}-day plan now. Remember: ONLY JSON output, al
         })
       )
 
-      // Enforce budget_breakdown total
+      // Enforce budget_breakdown total — proportionally scale if AI over-allocated
       const bb = plan.budget_breakdown as Record<string, number>
       const computedTotal = (bb.transport ?? 0) + (bb.hotels ?? 0) + (bb.food ?? 0) + (bb.activities ?? 0) + (bb.buffer ?? 0)
       if (computedTotal !== total_budget) {
-        // Adjust buffer to reconcile
         const diff = total_budget - computedTotal
-        bb.buffer = Math.max(0, (bb.buffer ?? 0) + diff)
+        const newBuffer = (bb.buffer ?? 0) + diff
+        if (newBuffer >= 0) {
+          bb.buffer = newBuffer
+        } else {
+          const categories: Array<keyof typeof bb> = ['transport', 'hotels', 'food', 'activities']
+          const coreTotal = categories.reduce((s, k) => s + (bb[k] ?? 0), 0)
+          if (coreTotal > 0) {
+            const scale = total_budget / coreTotal
+            for (const k of categories) bb[k] = Math.round((bb[k] ?? 0) * scale)
+          }
+          bb.buffer = 0
+        }
         bb.total = total_budget
       } else {
         bb.total = total_budget
       }
 
       // Cap activity costs if they exceed 15% of budget
-      const activityBudgetCap = Math.round(total_budget * 0.15)
       const totalActivityCost = plan.days.reduce(
         (sum: number, day: { activities?: Array<{ cost?: number; is_free?: boolean }> }) =>
-          sum +
-          (day.activities ?? []).reduce(
-            (s: number, a) => s + (a.is_free ? 0 : (a.cost ?? 0)),
-            0
-          ),
-        0
+          sum + (day.activities ?? []).reduce(
+            (s: number, a) => s + (a.is_free ? 0 : (a.cost ?? 0)), 0
+          ), 0
       )
       if (totalActivityCost > activityBudgetCap) {
         const scale = activityBudgetCap / totalActivityCost
@@ -388,7 +321,6 @@ Generate the complete ${total_days}-day plan now. Remember: ONLY JSON output, al
           })
         )
         plan.budget_breakdown.activities = activityBudgetCap
-        // Re-adjust buffer
         const newTotal =
           plan.budget_breakdown.transport +
           plan.budget_breakdown.hotels +
@@ -401,6 +333,19 @@ Generate the complete ${total_days}-day plan now. Remember: ONLY JSON output, al
       return NextResponse.json(plan)
     } catch (error) {
       console.error(`Full-plan generation error (attempt ${attempt + 1}):`, error)
+
+      // Detect Groq rate-limit errors and surface a clear message
+      const errMsg = (error as { error?: { message?: string }; message?: string })?.error?.message
+        ?? (error as { message?: string })?.message ?? ''
+      if (errMsg.includes('rate_limit_exceeded') || errMsg.includes('Rate limit')) {
+        const retryMatch = errMsg.match(/try again in ([^.]+)/)
+        const retryIn = retryMatch ? ` (retry in ${retryMatch[1]})` : ''
+        return NextResponse.json(
+          { error: `AI daily limit reached${retryIn}. Please wait a few minutes and try again. If this keeps happening, upgrade your Groq API plan at console.groq.com.` },
+          { status: 429 }
+        )
+      }
+
       if (attempt === maxRetries) {
         return NextResponse.json({ error: 'AI plan generation failed. Please try again.' }, { status: 500 })
       }

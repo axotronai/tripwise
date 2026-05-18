@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /auth/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /trips/
+
+# Allow public marketing pages
+Allow: /destinations/
+Allow: /packing-list
+Allow: /trains
+
+Sitemap: https://tripwise.in/sitemap.xml

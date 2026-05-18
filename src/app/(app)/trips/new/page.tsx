@@ -21,6 +21,7 @@ interface TripForm {
   destination: string
   isMultiCity: boolean
   extraDestinations: string[]
+  daysPerDestination: Record<string, number>   // city → nights (used when multi-city)
   start_city: string
   start_date: string
   end_date: string
@@ -246,6 +247,7 @@ function NewTripForm() {
     destination: searchParams.get('destination') || '',
     isMultiCity: false,
     extraDestinations: [],
+    daysPerDestination: {},
     start_city: '',
     start_date: '',
     end_date: '',
@@ -324,7 +326,30 @@ function NewTripForm() {
   }
 
   function removeExtraCity(city: string) {
-    setForm(f => ({ ...f, extraDestinations: f.extraDestinations.filter(c => c !== city) }))
+    setForm(f => {
+      const newDays = { ...f.daysPerDestination }
+      delete newDays[city]
+      return { ...f, extraDestinations: f.extraDestinations.filter(c => c !== city), daysPerDestination: newDays }
+    })
+  }
+
+  // Total allocated nights across all destinations (multi-city mode)
+  function totalAllocatedNights(): number {
+    const allCities = [form.destination, ...form.extraDestinations]
+    return allCities.reduce((sum, city) => sum + (form.daysPerDestination[city] ?? 2), 0)
+  }
+
+  function setDaysForCity(city: string, days: number) {
+    setForm(f => ({ ...f, daysPerDestination: { ...f.daysPerDestination, [city]: Math.max(1, days) } }))
+  }
+
+  // When multi-city + start_date is set, auto-compute end_date from allocated nights
+  function autoSetEndDate(startDate: string) {
+    if (!form.isMultiCity) return
+    const nights = totalAllocatedNights()
+    const end = new Date(startDate)
+    end.setDate(end.getDate() + nights)
+    setForm(f => ({ ...f, start_date: startDate, end_date: end.toISOString().split('T')[0] }))
   }
 
   // ── Interest toggle ──────────────────────────────────────────────────────
@@ -344,7 +369,9 @@ function NewTripForm() {
       case 1:  return form.destination.trim().length > 0
       case 2:  return !form.isMultiCity || form.extraDestinations.length >= 1
       case 3:  return form.start_city.trim().length > 0
-      case 4:  return !!form.start_date && !!form.end_date && duration >= 1
+      case 4:  return form.isMultiCity && form.extraDestinations.length > 0
+                 ? !!form.start_date && totalAllocatedNights() >= 2
+                 : !!form.start_date && !!form.end_date && duration >= 1
       case 5:  return true
       case 6:  return form.total_budget > 0
       case 7:  return true
@@ -378,10 +405,27 @@ function NewTripForm() {
     }
     if (duration < 1) { toast.error('End date must be after start date'); return }
 
+    // Multi-city validation: allocated nights must match the date range
+    if (form.isMultiCity && form.extraDestinations.length > 0) {
+      const allocated = totalAllocatedNights()
+      if (allocated !== duration) {
+        toast.error(
+          `Allocated nights (${allocated}) must match your trip duration (${duration} days). ` +
+          `Please adjust the nights per destination.`
+        )
+        return
+      }
+    }
+
     setGenerating(true)
 
     try {
       const allDestinations = [form.destination, ...form.extraDestinations]
+
+      // For multi-city trips, use allocated nights (validated to equal duration above)
+      const effectiveDays = form.isMultiCity && form.extraDestinations.length > 0
+        ? totalAllocatedNights()
+        : duration
 
       const planPayload = {
         destination: form.destination,
@@ -389,7 +433,7 @@ function NewTripForm() {
         start_city: form.start_city,
         start_date: form.start_date,
         end_date: form.end_date,
-        total_days: duration,
+        total_days: effectiveDays,
         group_type: form.groupType,
         group_size: form.group_size,
         children: form.children,
@@ -398,6 +442,10 @@ function NewTripForm() {
         interests: form.interests,
         diet: form.diet,
         transport_pref: form.transport_pref,
+        // Per-city nights for multi-city (lets AI distribute days correctly)
+        nights_per_destination: form.isMultiCity && Object.keys(form.daysPerDestination).length > 0
+          ? form.daysPerDestination
+          : undefined,
       }
 
       // 1. Generate full AI plan
@@ -418,7 +466,7 @@ function NewTripForm() {
           start_city: form.start_city,
           start_date: form.start_date,
           end_date: form.end_date,
-          total_days: duration,
+          total_days: effectiveDays,
           total_budget: form.total_budget,
           travel_style: form.travel_style,
           group_size: form.group_size,
@@ -461,7 +509,8 @@ function NewTripForm() {
       router.push(`/trips/${tripId}?generated=1`)
     } catch (err) {
       console.error(err)
-      toast.error('Something went wrong. Please try again.')
+      const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      toast.error(msg, { duration: 8000 })
       setGenerating(false)
     }
   }
@@ -672,48 +721,82 @@ function NewTripForm() {
                 </div>
 
                 {form.isMultiCity && (
-                  <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
-                    <p className="text-sm font-semibold text-gray-700">
-                      Add cities after <span className="text-blue-600">{form.destination}</span>:
-                    </p>
-                    <div className="flex gap-2">
-                      <SuggestInput
-                        value={extraCityInput}
-                        onChange={setExtraCityInput}
-                        suggestions={INDIAN_CITIES}
-                        placeholder="Add a city…"
-                        className="flex-1"
-                      />
-                      <Button
-                        type="button"
-                        onClick={addExtraCity}
-                        disabled={!extraCityInput.trim() || form.extraDestinations.length >= 3}
-                        className="bg-blue-600 hover:bg-blue-700 rounded-xl"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
+                  <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                    {/* City adder */}
+                    <div>
+                      <p className="text-sm font-semibold text-gray-700 mb-2">
+                        Add cities after <span className="text-blue-600">{form.destination}</span>:
+                      </p>
+                      <div className="flex gap-2">
+                        <SuggestInput
+                          value={extraCityInput}
+                          onChange={setExtraCityInput}
+                          suggestions={INDIAN_CITIES}
+                          placeholder="Add a city…"
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          onClick={addExtraCity}
+                          disabled={!extraCityInput.trim() || form.extraDestinations.length >= 3}
+                          className="bg-blue-600 hover:bg-blue-700 rounded-xl"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    {form.extraDestinations.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {form.extraDestinations.map(city => (
-                          <span
-                            key={city}
-                            className="flex items-center gap-1.5 bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1.5 rounded-full"
-                          >
-                            {city}
-                            <button
-                              type="button"
-                              onClick={() => removeExtraCity(city)}
-                              className="hover:text-blue-600"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
+
+                    {/* Per-destination days allocator */}
+                    {[form.destination, ...form.extraDestinations].length > 0 && (
+                      <div className="bg-gray-50 rounded-2xl border border-gray-200 p-4 space-y-3">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                          🗓️ How many days in each city?
+                        </p>
+                        {[form.destination, ...form.extraDestinations].map((city, idx) => {
+                          const nights = form.daysPerDestination[city] ?? 2
+                          return (
+                            <div key={city} className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full shrink-0">
+                                  {idx === 0 ? '1st' : idx === 1 ? '2nd' : idx === 2 ? '3rd' : `${idx+1}th`}
+                                </span>
+                                <span className="font-semibold text-sm text-gray-800 truncate">{city}</span>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => setDaysForCity(city, nights - 1)}
+                                  className="w-8 h-8 rounded-lg border-2 border-gray-200 flex items-center justify-center font-bold text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors disabled:opacity-30"
+                                  disabled={nights <= 1}
+                                >
+                                  −
+                                </button>
+                                <span className="w-16 text-center text-sm font-bold text-gray-900">
+                                  {nights} {nights === 1 ? 'night' : 'nights'}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setDaysForCity(city, nights + 1)}
+                                  className="w-8 h-8 rounded-lg border-2 border-gray-200 flex items-center justify-center font-bold text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        })}
+                        {/* Total */}
+                        <div className="border-t border-gray-200 pt-3 flex items-center justify-between">
+                          <span className="text-sm font-semibold text-gray-600">Total trip duration</span>
+                          <span className="text-lg font-extrabold text-blue-700">
+                            {totalAllocatedNights()} days
                           </span>
-                        ))}
+                        </div>
                       </div>
                     )}
+
                     <p className="text-xs text-gray-400">
-                      Route will be: {[form.destination, ...form.extraDestinations].join(' → ')}
+                      Route: {[form.destination, ...form.extraDestinations].join(' → ')} → back home
                     </p>
                   </div>
                 )}
@@ -728,18 +811,25 @@ function NewTripForm() {
                     Question 3
                   </p>
                   <h1 className="text-3xl font-extrabold text-gray-900">
-                    Where are you starting from?
+                    Which city are you travelling from?
                   </h1>
                   <p className="text-gray-500 mt-1">
-                    We'll plan transport from your city to {form.destination}
+                    Your home / departure city — we'll plan trains or flights from here to{' '}
+                    <span className="font-semibold text-blue-600">{form.destination}</span>
                   </p>
                 </div>
                 <SuggestInput
                   value={form.start_city}
                   onChange={v => setForm(f => ({ ...f, start_city: v }))}
                   suggestions={INDIAN_CITIES}
-                  placeholder="Your home / departure city…"
+                  placeholder="e.g. Mumbai, Delhi, Bangalore…"
                 />
+                {form.start_city && (
+                  <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-700">
+                    🚂 AI will find the best {form.transport_pref === 'flight' ? 'flights' : form.transport_pref === 'bus' ? 'buses' : 'trains & transport'} from{' '}
+                    <strong>{form.start_city}</strong> → <strong>{form.destination}</strong>
+                  </div>
+                )}
               </div>
             )}
 
@@ -772,35 +862,82 @@ function NewTripForm() {
                   ))}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label className="text-sm font-medium">Start Date</Label>
-                    <Input
-                      type="date"
-                      value={form.start_date}
-                      min={new Date().toISOString().split('T')[0]}
-                      onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
-                      className="h-12"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-sm font-medium">End Date</Label>
-                    <Input
-                      type="date"
-                      value={form.end_date}
-                      min={form.start_date || new Date().toISOString().split('T')[0]}
-                      onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))}
-                      className="h-12"
-                    />
-                  </div>
-                </div>
+                {/* Multi-city: show per-city breakdown + only pick start date */}
+                {form.isMultiCity && form.extraDestinations.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium">Trip Start Date</Label>
+                      <Input
+                        type="date"
+                        value={form.start_date}
+                        min={new Date().toISOString().split('T')[0]}
+                        onChange={e => autoSetEndDate(e.target.value)}
+                        className="h-12"
+                      />
+                    </div>
 
-                {duration > 0 && (
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-4 text-center">
-                    <span className="text-3xl font-extrabold text-blue-700">{duration}</span>
-                    <span className="text-blue-600 font-semibold text-lg"> day{duration !== 1 ? 's' : ''}</span>
-                    <span className="text-blue-400 text-sm"> to {form.destination}</span>
+                    {form.start_date && (
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 space-y-3">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">📅 Your itinerary timeline</p>
+                        {(() => {
+                          const cities = [form.destination, ...form.extraDestinations]
+                          let offset = 0
+                          return cities.map(city => {
+                            const nights = form.daysPerDestination[city] ?? 2
+                            const arrDate = new Date(form.start_date)
+                            arrDate.setDate(arrDate.getDate() + offset)
+                            const depDate = new Date(form.start_date)
+                            depDate.setDate(depDate.getDate() + offset + nights)
+                            const fmt = (d: Date) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+                            offset += nights
+                            return (
+                              <div key={city} className="flex items-center justify-between text-sm">
+                                <span className="font-semibold text-gray-800">📍 {city}</span>
+                                <span className="text-gray-500 text-xs">{fmt(arrDate)} → {fmt(depDate)} <span className="text-blue-600 font-medium">({nights}n)</span></span>
+                              </div>
+                            )
+                          })
+                        })()}
+                        <div className="border-t border-blue-100 pt-2 flex justify-between items-center">
+                          <span className="text-sm font-semibold text-blue-700">Total</span>
+                          <span className="text-xl font-extrabold text-blue-700">{totalAllocatedNights()} days</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-medium">Start Date</Label>
+                        <Input
+                          type="date"
+                          value={form.start_date}
+                          min={new Date().toISOString().split('T')[0]}
+                          onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
+                          className="h-12"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-medium">End Date</Label>
+                        <Input
+                          type="date"
+                          value={form.end_date}
+                          min={form.start_date || new Date().toISOString().split('T')[0]}
+                          onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))}
+                          className="h-12"
+                        />
+                      </div>
+                    </div>
+
+                    {duration > 0 && (
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-4 text-center">
+                        <span className="text-3xl font-extrabold text-blue-700">{duration}</span>
+                        <span className="text-blue-600 font-semibold text-lg"> day{duration !== 1 ? 's' : ''}</span>
+                        <span className="text-blue-400 text-sm"> to {form.destination}</span>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}

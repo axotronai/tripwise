@@ -24,6 +24,8 @@ export interface Trip {
   travel_style: TravelStyle
   group_size: number
   children?: number
+  diet?: 'veg' | 'nonveg' | 'jain' | 'any'
+  ai_insights?: string
   created_at: string
   days?: ItineraryDay[]
   budget_breakdown?: BudgetBreakdown
@@ -92,6 +94,7 @@ export interface BudgetBreakdown {
   activities: number
   buffer: number
   spent: number
+  perPerson?: number
 }
 
 export interface Expense {

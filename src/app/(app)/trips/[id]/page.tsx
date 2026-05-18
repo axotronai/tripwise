@@ -23,6 +23,9 @@ import PlacesExplorer from '@/components/trip/PlacesExplorer'
 import ExpenseTracker from '@/components/trip/ExpenseTracker'
 import PlanWizard from '@/components/planning/PlanWizard'
 import WeatherWidget from '@/components/trip/WeatherWidget'
+import CreditCardWidget from '@/components/affiliate/CreditCardWidget'
+import InsuranceBanner from '@/components/affiliate/InsuranceBanner'
+import DealsBar from '@/components/affiliate/DealsBar'
 import { SelectedHotel, TripDay } from '@/components/hotel/HotelSearch'
 import { useTripStore } from '@/store/tripStore'
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
@@ -137,7 +140,7 @@ function TripPageInner() {
         const daysWithIds = (data.days?.length ? data.days : generateDays(data.trip.start_date, data.trip.end_date, data.trip.destination))
           .map((d: ItineraryDay, i: number) => ({ ...d, id: d.id || `day-${i}`, trip_id: data.trip.id, activities: d.activities || [] }))
         setDays(daysWithIds)
-        setBudgetBreakdown(calcBudgetBreakdown(data.trip.total_budget, data.trip.travel_style, data.trip.total_days, data.trip.group_size))
+        setBudgetBreakdown(calcBudgetBreakdown(data.trip.total_budget, data.trip.travel_style, data.trip.total_days, data.trip.group_size, data.trip.children ?? 0))
 
         // Load persisted hotels and transports
         const [hotelsRes, transportsRes] = await Promise.all([
@@ -165,7 +168,7 @@ function TripPageInner() {
         const demoDays = generateDays(demo.start_date, demo.end_date, demo.destination)
           .map((d, i) => ({ ...d, id: `day-${i}`, trip_id: demo.id, activities: [] }))
         setDays(demoDays)
-        setBudgetBreakdown(calcBudgetBreakdown(demo.total_budget, demo.travel_style, demo.total_days, demo.group_size))
+        setBudgetBreakdown(calcBudgetBreakdown(demo.total_budget, demo.travel_style, demo.total_days, demo.group_size, 0))
       } finally { setLoading(false) }
     }
     load()
@@ -273,6 +276,7 @@ function TripPageInner() {
           travel_style:    currentTrip.travel_style,
           group_size:      currentTrip.group_size,
           children:        currentTrip.children ?? 0,
+          diet:            currentTrip.diet ?? 'any',
           start_city:      currentTrip.start_city,
           start_date:      currentTrip.start_date,
           dayHotels,
@@ -300,7 +304,14 @@ function TripPageInner() {
         money_saving_tips:        data.money_saving_tips,
       }
       setAiInsights(insights)
+      // Persist insights locally (fast) AND to server (durable, cross-device)
       try { localStorage.setItem(`insights-${id}`, JSON.stringify(insights)) } catch { /* storage full */ }
+      // Fire-and-forget server sync — non-blocking so it doesn't slow the UI
+      fetch(`/api/trips/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ai_insights: JSON.stringify(insights) }),
+      }).catch(() => { /* sync failure is non-critical — localStorage still works */ })
 
       const startDate = new Date(currentTrip.start_date)
       const updated = days.map((day, i) => {
@@ -342,7 +353,11 @@ function TripPageInner() {
   }
 
   async function saveBudget() {
-    if (!currentTrip || newBudget < 1000) { toast.error('Enter a valid budget (min ₹1,000)'); return }
+    const MAX_BUDGET = 10_000_000 // ₹1 crore
+    if (!currentTrip || newBudget < 1000 || newBudget > MAX_BUDGET) {
+      toast.error(`Budget must be between ₹1,000 and ${formatINR(MAX_BUDGET)}`)
+      return
+    }
     try {
       const res = await fetch(`/api/trips/${id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
@@ -350,7 +365,7 @@ function TripPageInner() {
       })
       if (!res.ok) throw new Error()
       setCurrentTrip({ ...currentTrip, total_budget: newBudget })
-      setBudgetBreakdown(calcBudgetBreakdown(newBudget, currentTrip.travel_style, currentTrip.total_days, currentTrip.group_size))
+      setBudgetBreakdown(calcBudgetBreakdown(newBudget, currentTrip.travel_style, currentTrip.total_days, currentTrip.group_size, currentTrip.children ?? 0))
       setEditBudget(false)
       toast.success('Budget updated')
     } catch { toast.error('Could not save budget') }
@@ -366,7 +381,7 @@ function TripPageInner() {
       })
       if (!res.ok) throw new Error()
       setCurrentTrip({ ...currentTrip, ...settings })
-      setBudgetBreakdown(calcBudgetBreakdown(settings.total_budget, settings.travel_style, currentTrip.total_days, settings.group_size))
+      setBudgetBreakdown(calcBudgetBreakdown(settings.total_budget, settings.travel_style, currentTrip.total_days, settings.group_size, settings.children ?? 0))
       setShowSettings(false)
       toast.success('Settings saved — regenerate AI to apply changes')
     } catch { toast.error('Could not save settings') }
@@ -727,9 +742,19 @@ function TripPageInner() {
             onAddToTrip={handleAddTransport}
             addedTransportIds={addedTransportIds}
           />
+          {/* Affiliate: Deals Bar */}
+          <div className="mt-4">
+            <DealsBar
+              from={currentTrip.start_city}
+              to={currentTrip.destination}
+              date={currentTrip.start_date}
+              adults={currentTrip.group_size}
+              destination={currentTrip.destination}
+            />
+          </div>
         </TabsContent>
 
-        <TabsContent value="hotels" className="mt-4">
+        <TabsContent value="hotels" className="mt-4 space-y-4">
           <HotelSearch
             defaultCity={currentTrip.destination}
             checkin={currentTrip.start_date}
@@ -738,6 +763,16 @@ function TripPageInner() {
             dayHotels={dayHotels}
             onSelectHotelForDays={handleSelectHotel}
             onRemoveHotelFromDay={handleRemoveHotel}
+          />
+          {/* Affiliate: Credit Card Widget */}
+          <CreditCardWidget compact />
+          {/* Affiliate: Insurance */}
+          <InsuranceBanner
+            destination={currentTrip.destination}
+            totalDays={currentTrip.total_days}
+            groupSize={currentTrip.group_size}
+            totalBudget={currentTrip.total_budget}
+            compact
           />
         </TabsContent>
 
@@ -759,7 +794,7 @@ function TripPageInner() {
           />
         </TabsContent>
 
-        <TabsContent value="budget" className="mt-4">
+        <TabsContent value="budget" className="mt-4 space-y-4">
           {budgetBreakdown && (
             <BudgetTracker
               breakdown={budgetBreakdown}
@@ -770,6 +805,15 @@ function TripPageInner() {
                 : undefined}
             />
           )}
+          {/* Affiliate: Full credit card comparison */}
+          <CreditCardWidget />
+          {/* Affiliate: Travel insurance */}
+          <InsuranceBanner
+            destination={currentTrip.destination}
+            totalDays={currentTrip.total_days}
+            groupSize={currentTrip.group_size}
+            totalBudget={currentTrip.total_budget}
+          />
         </TabsContent>
 
         <TabsContent value="expenses" className="mt-4">
@@ -884,7 +928,7 @@ function TripPageInner() {
               </div>
               <p className="text-xs text-gray-500">
                 {formatINR(Math.round(settings.total_budget / Math.max(currentTrip.total_days, 1)))} per day ·{' '}
-                {formatINR(Math.round(settings.total_budget / Math.max(settings.group_size, 1)))} per person
+                {formatINR(Math.round(settings.total_budget / Math.max(settings.group_size + (settings.children ?? 0), 1)))} per person
               </p>
             </div>
 
