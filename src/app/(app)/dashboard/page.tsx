@@ -17,17 +17,30 @@ const STYLE_EMOJI: Record<string, string> = {
   budget: '🎒', comfort: '🏨', luxury: '✨', adventure: '🧗', family: '👨‍👩‍👧',
 }
 const DEST_GRADIENT: Record<string, string> = {
-  'Goa': 'from-cyan-400 to-blue-500', 'Manali': 'from-blue-400 to-indigo-600',
-  'Jaipur': 'from-orange-400 to-pink-500', 'Kerala': 'from-green-400 to-emerald-600',
-  'Ladakh': 'from-indigo-400 to-purple-600', 'Andaman': 'from-teal-400 to-cyan-600',
+  'Goa':       'from-cyan-400 to-blue-500',
+  'Manali':    'from-blue-400 to-indigo-600',
+  'Jaipur':    'from-orange-400 to-pink-500',
+  'Kerala':    'from-green-400 to-emerald-600',
+  'Ladakh':    'from-indigo-400 to-purple-600',
+  'Andaman':   'from-teal-400 to-cyan-600',
+  'Varanasi':  'from-amber-400 to-orange-500',
+  'Rishikesh': 'from-green-500 to-teal-600',
+  'Udaipur':   'from-rose-400 to-pink-600',
+  'Shimla':    'from-sky-400 to-blue-600',
+  'Coorg':     'from-lime-400 to-green-600',
+  'Hampi':     'from-yellow-400 to-orange-500',
+  'Munnar':    'from-emerald-400 to-green-600',
+  'Ooty':      'from-violet-400 to-purple-600',
+  'Darjeeling':'from-blue-300 to-indigo-500',
 }
 const DEFAULT_GRADIENT = 'from-blue-400 to-indigo-600'
 
 function tripStatus(trip: Trip) {
   const start = new Date(trip.start_date)
   const end   = new Date(trip.end_date)
-  if (isToday(start) || (isPast(start) && isFuture(end))) return { label: 'Ongoing', color: 'bg-green-100 text-green-700 border-green-200' }
-  if (isPast(end))   return { label: 'Past',    color: 'bg-gray-100 text-gray-500 border-gray-200' }
+  // isToday(end) counts the last day as still ongoing
+  if (isToday(start) || (isPast(start) && (isFuture(end) || isToday(end)))) return { label: 'Ongoing', color: 'bg-green-100 text-green-700 border-green-200' }
+  if (isPast(end) && !isToday(end)) return { label: 'Past', color: 'bg-gray-100 text-gray-500 border-gray-200' }
   return { label: 'Upcoming', color: 'bg-blue-100 text-blue-700 border-blue-200' }
 }
 
@@ -52,7 +65,8 @@ export default function DashboardPage() {
       .finally(() => setLoading(false))
   }, [router])
 
-  async function deleteTrip(id: string) {
+  async function deleteTrip(id: string, title: string) {
+    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return
     await fetch(`/api/trips/${id}`, { method: 'DELETE' })
     setTrips(prev => prev.filter(t => t.id !== id))
     toast.success('Trip deleted')
@@ -235,7 +249,7 @@ export default function DashboardPage() {
                         : <Copy className="h-4 w-4" />}
                     </Button>
                     <Button variant="ghost" size="sm" className="px-2 text-red-400 hover:text-red-600 hover:bg-red-50"
-                      onClick={() => deleteTrip(trip.id)}>
+                      onClick={() => deleteTrip(trip.id, trip.title)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>

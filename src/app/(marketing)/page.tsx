@@ -7,7 +7,7 @@ import {
   MapPin, Train, Plane, IndianRupee, Brain, Calendar,
   Search, ArrowRight, Star, TrendingUp, Shield, Zap,
   Bus, Car, Camera, Building2, Users, ArrowLeftRight,
-  Sparkles, RefreshCw,
+  Sparkles, Mail,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,18 +15,23 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { kiwiFlightUrl, bookingComUrl } from '@/lib/affiliates'
+import { toast } from 'sonner'
 
 /* ─── Static Data ──────────────────────────────────────────────────── */
 
 const DESTINATIONS = [
-  { name: 'Goa',      type: 'Beach',      days: '4–6 days',  rating: 4.8, reviews: '12.4k', gradient: 'from-cyan-400 to-blue-500',    emoji: '🏖️' },
-  { name: 'Manali',   type: 'Mountains',  days: '5–7 days',  rating: 4.7, reviews: '9.1k',  gradient: 'from-blue-400 to-indigo-600',  emoji: '🏔️' },
-  { name: 'Jaipur',   type: 'Heritage',   days: '3–5 days',  rating: 4.6, reviews: '15.2k', gradient: 'from-orange-400 to-pink-500',  emoji: '🏰' },
-  { name: 'Kerala',   type: 'Backwaters', days: '5–7 days',  rating: 4.9, reviews: '18.7k', gradient: 'from-green-400 to-emerald-600',emoji: '🌿' },
-  { name: 'Ladakh',   type: 'Adventure',  days: '7–10 days', rating: 4.9, reviews: '7.3k',  gradient: 'from-indigo-400 to-purple-600',emoji: '🎒' },
-  { name: 'Andaman',  type: 'Islands',    days: '5–7 days',  rating: 4.7, reviews: '6.8k',  gradient: 'from-teal-400 to-cyan-600',    emoji: '🐠' },
-  { name: 'Varanasi', type: 'Spiritual',  days: '3–4 days',  rating: 4.5, reviews: '11.2k', gradient: 'from-amber-400 to-orange-500', emoji: '🛕' },
-  { name: 'Rishikesh',type: 'Adventure',  days: '3–5 days',  rating: 4.6, reviews: '8.9k',  gradient: 'from-green-500 to-teal-600',   emoji: '🧘' },
+  { name: 'Goa',        type: 'Beach',      days: '4–6 days',  rating: 4.8, reviews: '12.4k', gradient: 'from-cyan-400 to-blue-500',      emoji: '🏖️' },
+  { name: 'Manali',     type: 'Mountains',  days: '5–7 days',  rating: 4.7, reviews: '9.1k',  gradient: 'from-blue-400 to-indigo-600',    emoji: '🏔️' },
+  { name: 'Jaipur',     type: 'Heritage',   days: '3–5 days',  rating: 4.6, reviews: '15.2k', gradient: 'from-orange-400 to-pink-500',    emoji: '🏰' },
+  { name: 'Kerala',     type: 'Backwaters', days: '5–7 days',  rating: 4.9, reviews: '18.7k', gradient: 'from-green-400 to-emerald-600',  emoji: '🌿' },
+  { name: 'Ladakh',     type: 'Adventure',  days: '7–10 days', rating: 4.9, reviews: '7.3k',  gradient: 'from-indigo-400 to-purple-600',  emoji: '🎒' },
+  { name: 'Andaman',    type: 'Islands',    days: '5–7 days',  rating: 4.7, reviews: '6.8k',  gradient: 'from-teal-400 to-cyan-600',      emoji: '🐠' },
+  { name: 'Varanasi',   type: 'Spiritual',  days: '3–4 days',  rating: 4.5, reviews: '11.2k', gradient: 'from-amber-400 to-orange-500',   emoji: '🛕' },
+  { name: 'Rishikesh',  type: 'Adventure',  days: '3–5 days',  rating: 4.6, reviews: '8.9k',  gradient: 'from-green-500 to-teal-600',     emoji: '🧘' },
+  { name: 'Udaipur',    type: 'Heritage',   days: '3–4 days',  rating: 4.7, reviews: '10.2k', gradient: 'from-rose-400 to-pink-600',      emoji: '🏯' },
+  { name: 'Shimla',     type: 'Mountains',  days: '4–6 days',  rating: 4.6, reviews: '9.5k',  gradient: 'from-sky-400 to-blue-600',       emoji: '🏔️' },
+  { name: 'Coorg',      type: 'Nature',     days: '3–4 days',  rating: 4.7, reviews: '7.8k',  gradient: 'from-lime-400 to-green-600',     emoji: '☕' },
+  { name: 'Hampi',      type: 'Heritage',   days: '2–3 days',  rating: 4.5, reviews: '5.4k',  gradient: 'from-yellow-400 to-orange-500',  emoji: '🗿' },
 ]
 
 const FEATURES = [
@@ -196,7 +201,7 @@ export default function HomePage() {
                   <button
                     key={t.id}
                     onClick={() => setTab(t.id)}
-                    className={`flex flex-col items-center gap-1 px-5 py-3.5 text-xs font-semibold whitespace-nowrap transition-all shrink-0 border-b-2 ${
+                    className={`relative flex flex-col items-center gap-1 px-5 py-3.5 text-xs font-semibold whitespace-nowrap transition-all shrink-0 border-b-2 ${
                       active
                         ? t.primary
                           ? 'border-blue-600 text-blue-600 bg-blue-50'
@@ -536,34 +541,46 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* Infinite marquee strip */}
-        <div className="flex gap-5 animate-marquee w-max">
-          {[...DESTINATIONS, ...DESTINATIONS].map((dest, i) => (
-            <Link key={i} href={`/destinations/${dest.name.toLowerCase()}`} className="shrink-0">
-              <div className={`relative w-52 h-52 rounded-2xl overflow-hidden bg-gradient-to-br ${dest.gradient} group cursor-pointer shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300`}>
-                {/* big emoji centered */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-7xl drop-shadow-lg group-hover:scale-110 transition-transform duration-300">{dest.emoji}</span>
-                </div>
-                {/* type badge top-right */}
-                <div className="absolute top-3 right-3 bg-white/25 backdrop-blur-sm text-white text-xs font-semibold px-2 py-0.5 rounded-full">
-                  {dest.type}
-                </div>
-                {/* bottom gradient overlay with name + rating */}
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-8">
-                  <p className="text-white font-bold text-base leading-tight">{dest.name}</p>
-                  <div className="flex items-center justify-between mt-0.5">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                      <span className="text-white/90 text-xs font-medium">{dest.rating}</span>
-                      <span className="text-white/60 text-xs">({dest.reviews})</span>
+        {/* Infinite marquee strip with fade masks */}
+        <div className="relative">
+          {/* Left fade */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white to-transparent z-10" />
+          {/* Right fade */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white to-transparent z-10" />
+
+          <div className="flex gap-5 animate-marquee w-max py-3">
+            {[...DESTINATIONS, ...DESTINATIONS].map((dest, i) => (
+              <Link
+                key={i}
+                href={`/destinations/${dest.name.toLowerCase()}`}
+                className="shrink-0"
+                aria-label={`Plan a trip to ${dest.name}`}
+              >
+                <div className={`relative w-52 h-52 rounded-2xl overflow-hidden bg-gradient-to-br ${dest.gradient} group cursor-pointer shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300`}>
+                  {/* big emoji centered */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-7xl drop-shadow-lg group-hover:scale-110 transition-transform duration-300">{dest.emoji}</span>
+                  </div>
+                  {/* type badge top-right */}
+                  <div className="absolute top-3 right-3 bg-white/25 backdrop-blur-sm text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                    {dest.type}
+                  </div>
+                  {/* bottom gradient overlay with name + rating */}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-8">
+                    <p className="text-white font-bold text-base leading-tight">{dest.name}</p>
+                    <div className="flex items-center justify-between mt-0.5">
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        <span className="text-white/90 text-xs font-medium">{dest.rating}</span>
+                        <span className="text-white/60 text-xs">({dest.reviews})</span>
+                      </div>
+                      <span className="text-white/70 text-xs">{dest.days}</span>
                     </div>
-                    <span className="text-white/70 text-xs">{dest.days}</span>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -711,11 +728,18 @@ export default function HomePage() {
 
           {/* Newsletter signup */}
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-8 text-center max-w-2xl mx-auto">
-            <RefreshCw className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+            <Mail className="h-8 w-8 text-blue-500 mx-auto mb-3" />
             <h3 className="text-xl font-bold text-gray-900 mb-1">Get Travel Deals in Your Inbox</h3>
             <p className="text-sm text-gray-500 mb-5">Weekly deals on trains, flights & hotels — curated for Indian destinations. No spam, unsubscribe anytime.</p>
             <form
-              onSubmit={e => { e.preventDefault(); const input = (e.currentTarget.elements.namedItem('email') as HTMLInputElement); if (input?.value) { input.value = ''; alert('Thanks! Watch your inbox for deals 🎉') } }}
+              onSubmit={e => {
+                e.preventDefault()
+                const input = e.currentTarget.elements.namedItem('email') as HTMLInputElement
+                if (input?.value) {
+                  input.value = ''
+                  toast.success('Thanks! Watch your inbox for deals 🎉')
+                }
+              }}
               className="flex gap-2 max-w-sm mx-auto"
             >
               <Input name="email" type="email" placeholder="your@email.com" required className="flex-1 h-11 border-blue-200 focus-visible:ring-blue-400" />
