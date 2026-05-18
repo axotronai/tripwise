@@ -33,6 +33,12 @@ export const AFF = {
 }
 
 // ─── UTM tag helper ───────────────────────────────────────────────────────────
+function addUtm(p: URLSearchParams, medium = 'affiliate') {
+  p.set('utm_source', 'tripwise')
+  p.set('utm_medium', medium)
+  p.set('utm_campaign', 'tripwise')
+}
+/** @deprecated — use addUtm(p) instead */
 function utm(medium = 'affiliate') {
   return `utm_source=tripwise&utm_medium=${medium}&utm_campaign=tripwise`
 }
@@ -44,8 +50,8 @@ export function bookingComUrl(city: string, checkin?: string, checkout?: string,
   if (checkout) p.set('checkout', checkout)
   p.set('group_adults', String(guests))
   if (AFF.bookingCom) p.set('aid', AFF.bookingCom)
-  p.set(utm(), '')   // remove = sign trick – just append UTM
-  return `https://www.booking.com/searchresults.html?${p.toString().replace('=&', '&').replace(/&$/, '')}`
+  addUtm(p)
+  return `https://www.booking.com/searchresults.html?${p}`
 }
 
 export function bookingComHotelUrl(hotelName: string, city: string, checkin?: string, checkout?: string) {
@@ -130,8 +136,9 @@ export function getyourguideUrl(query: string, city: string) {
 
 // ─── Insurance ────────────────────────────────────────────────────────────────
 export function policyBazaarTravelUrl(destination?: string) {
-  const p = new URLSearchParams({ [utm('cpa')]: '' })
-  if (AFF.policybazaar) p.set('utm_source', AFF.policybazaar)
+  const p = new URLSearchParams()
+  addUtm(p, 'cpa')
+  if (AFF.policybazaar) p.set('utm_term', AFF.policybazaar)
   const dest = destination ? `/${destination.toLowerCase().replace(/\s+/g, '-')}` : ''
   return `https://www.policybazaar.com/insurance/travel-insurance${dest}/?${p}`
 }
@@ -142,14 +149,16 @@ export function coverfoxInsuranceUrl() {
 
 // ─── Credit Cards (highest commission!) ──────────────────────────────────────
 export function bankBazaarCCUrl(card?: string) {
-  const p = new URLSearchParams({ [utm('cpa')]: '' })
-  if (AFF.bankbazaar) { p.delete(utm('cpa')); p.set('utm_source', 'tripwise'); p.set('ref', AFF.bankbazaar) }
+  const p = new URLSearchParams()
+  addUtm(p, 'cpa')
+  if (AFF.bankbazaar) p.set('ref', AFF.bankbazaar)
   const slug = card ? `/credit-card/${card}-credit-card.html` : '/credit-card/travel-credit-cards.html'
   return `https://www.bankbazaar.com${slug}?${p}`
 }
 
 export function creditMantriCCUrl(card?: string) {
-  const p = new URLSearchParams({ [utm('cpa')]: '' })
+  const p = new URLSearchParams()
+  addUtm(p, 'cpa')
   const category = card || 'travel-credit-cards'
   return `https://www.creditmantri.com/credit-card/${category}/?${p}`
 }

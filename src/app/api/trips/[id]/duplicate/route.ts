@@ -22,6 +22,11 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
 
   if (tripErr || !trip) return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
 
+  // IDOR check — only the trip owner can duplicate it
+  if (trip.user_id !== user.id) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   // Create the new trip (copy, owned by current user)
   const { data: newTrip, error: createErr } = await admin
     .from('trips')

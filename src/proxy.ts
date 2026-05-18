@@ -47,8 +47,13 @@ export async function proxy(req: NextRequest) {
   // Verify session (also refreshes expired tokens)
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Only protect dashboard — trip pages are open so anyone can plan a trip
-  if (pathname === '/dashboard' && !user) {
+  // Protected routes — redirect to login if not authenticated
+  // /trips/new is public (anyone can plan), but /trips/[id] requires auth
+  const isProtectedPath =
+    pathname === '/dashboard' ||
+    (pathname.startsWith('/trips/') && pathname !== '/trips/new' && !pathname.startsWith('/trips/new?'))
+
+  if (isProtectedPath && !user) {
     const url = req.nextUrl.clone()
     url.pathname = '/login'
     url.searchParams.set('next', pathname)

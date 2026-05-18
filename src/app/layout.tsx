@@ -70,13 +70,47 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
+const LD_ORGANIZATION = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'TripWise',
+  url: BASE_URL,
+  logo: `${BASE_URL}/icon-512.png`,
+  sameAs: ['https://twitter.com/tripwisein'],
+}
+
+const LD_WEBSITE = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'TripWise',
+  url: BASE_URL,
+  inLanguage: 'en-IN',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `${BASE_URL}/destinations/{search_term_string}`,
+    'query-input': 'required name=search_term_string',
+  },
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en-IN" className="h-full antialiased">
+      <head>
+        <link rel="preconnect" href="https://tp-em.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(LD_ORGANIZATION) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(LD_WEBSITE) }}
+        />
+      </head>
       <body className={`${inter.className} min-h-full flex flex-col bg-gray-50`}>
         {/* TravelPayouts affiliate tracking — fires on every page */}
         <Script

@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { kiwiFlightUrl, bookingComUrl } from '@/lib/affiliates'
+import { kiwiFlightUrl, bookingComUrl, redbusUrl } from '@/lib/affiliates'
 import { toast } from 'sonner'
 
 /* ─── Static Data ──────────────────────────────────────────────────── */
@@ -131,13 +131,13 @@ export default function HomePage() {
       const from = flFrom || 'Delhi'
       const to   = flTo   || 'Goa'
       const date = flDate || new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0]
-      window.open(kiwiFlightUrl(from, to, date, parseInt(flTravellers) || 1, flType), '_blank', 'noopener')
+      window.open(kiwiFlightUrl(from, to, date, parseInt(flTravellers) || 1, flType), '_blank', 'noopener,noreferrer')
 
     } else if (tab === 'hotels') {
       const city     = htCity     || 'Goa'
       const checkin  = htCheckin  || new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0]
       const checkout = htCheckout || new Date(Date.now() + 9*24*60*60*1000).toISOString().split('T')[0]
-      window.open(bookingComUrl(city + ' India', checkin, checkout, parseInt(htGuests) || 2), '_blank', 'noopener')
+      window.open(bookingComUrl(city + ' India', checkin, checkout, parseInt(htGuests) || 2), '_blank', 'noopener,noreferrer')
 
     } else if (tab === 'trains') {
       const params = new URLSearchParams()
@@ -147,22 +147,21 @@ export default function HomePage() {
       router.push(`/trains?${params.toString()}`)
 
     } else if (tab === 'buses') {
-      const from = buFrom || 'delhi'
-      const to   = buTo   || 'goa'
-      const date = buDate || new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0].split('-').reverse().join('-')
-      const redBusUrl = `https://www.redbus.in/bus-tickets/${from.toLowerCase().replace(/\s+/g, '-')}-to-${to.toLowerCase().replace(/\s+/g, '-')}?doj=${date}`
-      window.open(redBusUrl, '_blank', 'noopener')
+      const from = buFrom || 'Delhi'
+      const to   = buTo   || 'Goa'
+      const date = buDate || new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0]
+      window.open(redbusUrl(from, to, date), '_blank', 'noopener,noreferrer')
 
     } else if (tab === 'tours') {
       const city = toCity || 'goa'
       const thrillUrl = `https://www.thrillophilia.com/places/${city.toLowerCase().replace(/\s+/g, '-')}?utm_source=tripwise&utm_medium=affiliate&utm_campaign=tours`
-      window.open(thrillUrl, '_blank', 'noopener')
+      window.open(thrillUrl, '_blank', 'noopener,noreferrer')
 
     } else if (tab === 'cabs') {
       const from = cbFrom || 'Delhi'
       const to   = cbTo   || 'Agra'
-      const savaariUrl = `https://www.savaari.com/car-rental/${from.toLowerCase().replace(/\s+/g, '-')}-to-${to.toLowerCase().replace(/\s+/g, '-')}?utm_source=tripwise`
-      window.open(savaariUrl, '_blank', 'noopener')
+      const savaariUrl = `https://www.savaari.com/car-rental/${from.toLowerCase().replace(/\s+/g, '-')}-to-${to.toLowerCase().replace(/\s+/g, '-')}?utm_source=tripwise&utm_medium=affiliate&utm_campaign=tripwise`
+      window.open(savaariUrl, '_blank', 'noopener,noreferrer')
     }
   }
 
@@ -544,9 +543,9 @@ export default function HomePage() {
         {/* Infinite marquee strip with fade masks */}
         <div className="relative">
           {/* Left fade */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 sm:w-28 bg-gradient-to-r from-white to-transparent z-10" />
           {/* Right fade */}
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 sm:w-28 bg-gradient-to-l from-white to-transparent z-10" />
 
           <div className="flex gap-5 animate-marquee w-max py-3">
             {[...DESTINATIONS, ...DESTINATIONS].map((dest, i) => (
@@ -667,7 +666,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-10">How We Compare</h2>
           <div className="overflow-x-auto rounded-2xl shadow-sm">
-            <table className="w-full text-sm bg-white overflow-hidden">
+            <table className="w-full min-w-[560px] text-sm bg-white overflow-hidden">
               <thead>
                 <tr className="bg-blue-600 text-white">
                   <th className="text-left p-4 font-semibold">Feature</th>
@@ -740,7 +739,7 @@ export default function HomePage() {
                   toast.success('Thanks! Watch your inbox for deals 🎉')
                 }
               }}
-              className="flex gap-2 max-w-sm mx-auto"
+              className="flex flex-col sm:flex-row gap-2 max-w-sm mx-auto"
             >
               <Input name="email" type="email" placeholder="your@email.com" required className="flex-1 h-11 border-blue-200 focus-visible:ring-blue-400" />
               <Button type="submit" className="h-11 px-5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shrink-0">

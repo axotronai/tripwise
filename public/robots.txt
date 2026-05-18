@@ -4,6 +4,10 @@ Disallow: /api/
 Disallow: /auth/
 Disallow: /admin/
 Disallow: /dashboard/
+
+# Allow trip planning page (important for SEO/conversions)
+Allow: /trips/new
+# Block individual trip detail pages (private user data)
 Disallow: /trips/
 
 # Allow public marketing pages
@@ -11,4 +15,4 @@ Allow: /destinations/
 Allow: /packing-list
 Allow: /trains
 
-Sitemap: https://tripwise.in/sitemap.xml
+Sitemap: https://axozen.com/sitemap.xml
