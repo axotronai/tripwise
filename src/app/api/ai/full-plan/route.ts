@@ -9,6 +9,7 @@ import {
   ANTI_HALLUCINATION_RESTAURANTS, ANTI_HALLUCINATION_TRAINS,
   JSON_OUTPUT_RULE,
 } from '@/lib/ai/prompts'
+import { aiGuard } from '@/lib/ai/guard'
 
 function getGroq() {
   return new Groq({ apiKey: process.env.GROQ_API_KEY })
@@ -83,6 +84,9 @@ function buildSchemaExample(
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const { error } = await aiGuard(req)
+  if (error) return error
+
   const body = (await req.json()) as FullPlanRequest
 
   const {

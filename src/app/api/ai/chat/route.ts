@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
 
 import { getSeasonNote } from '@/lib/ai/season'
+import { aiGuard } from '@/lib/ai/guard'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
 
@@ -13,6 +14,9 @@ function fmtDate(iso: string) {
 }
 
 export async function POST(req: NextRequest) {
+  const { error } = await aiGuard(req)
+  if (error) return error
+
   const { messages, context } = await req.json()
   const { trip, days, dayHotels, savedTransports } = context || {}
 

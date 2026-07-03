@@ -3,10 +3,14 @@ import Groq from 'groq-sdk'
 import { getSeasonNote } from '@/lib/ai/season'
 import { getFestivalNote } from '@/lib/ai/festivals'
 import { JSON_OUTPUT_RULE } from '@/lib/ai/prompts'
+import { aiGuard } from '@/lib/ai/guard'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
 
 export async function POST(req: NextRequest) {
+  const { error } = await aiGuard(req)
+  if (error) return error
+
   const { destination, days, tripType, season, travelers, start_date } = await req.json()
 
   const seasonContext = start_date ? getSeasonNote(destination, start_date) : season || ''

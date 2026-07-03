@@ -3,10 +3,14 @@ import Groq from 'groq-sdk'
 import { getSeasonNote } from '@/lib/ai/season'
 import { getFestivalNote } from '@/lib/ai/festivals'
 import { ANTI_HALLUCINATION_RESTAURANTS, JSON_OUTPUT_RULE } from '@/lib/ai/prompts'
+import { aiGuard } from '@/lib/ai/guard'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
 
 export async function POST(req: NextRequest) {
+  const { error } = await aiGuard(req)
+  if (error) return error
+
   const { destination, diet, cuisine, budget_range, start_date } = await req.json()
 
   const dietLabel = diet === 'veg'    ? 'vegetarian ONLY (no meat, no eggs). Return ONLY 100% veg restaurants.' :

@@ -8,10 +8,14 @@ import {
   ANTI_HALLUCINATION_RESTAURANTS, ANTI_HALLUCINATION_TRAINS,
   JSON_OUTPUT_RULE,
 } from '@/lib/ai/prompts'
+import { aiGuard } from '@/lib/ai/guard'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
 
 export async function POST(req: NextRequest) {
+  const { error } = await aiGuard(req)
+  if (error) return error
+
   const {
     destination, days, budget, travel_style, group_size,
     children = 0, start_city, start_date, diet = 'any',

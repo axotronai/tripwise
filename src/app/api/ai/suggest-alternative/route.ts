@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
 import { getSeasonNote } from '@/lib/ai/season'
 import { ANTI_HALLUCINATION_PLACES, JSON_OUTPUT_RULE } from '@/lib/ai/prompts'
+import { aiGuard } from '@/lib/ai/guard'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
 
 export async function POST(req: NextRequest) {
+  const { error } = await aiGuard(req)
+  if (error) return error
+
   const { destination, activity, start_date, budget, travel_style } = await req.json()
 
   const seasonNote = start_date ? getSeasonNote(destination, start_date) : ''

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
 import { ANTI_HALLUCINATION_HOTELS, JSON_OUTPUT_RULE } from '@/lib/ai/prompts'
+import { aiGuard } from '@/lib/ai/guard'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
 
@@ -9,6 +10,9 @@ function buildMapUrl(name: string, city: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  const { error } = await aiGuard(req)
+  if (error) return error
+
   const { city, checkin, checkout, nights, guests = 1, travel_style = 'comfort', budget_per_night = 3000 } = await req.json()
 
   const maxBudget = Math.round(budget_per_night * 2)  // hard cap at 2x budget
