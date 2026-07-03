@@ -68,6 +68,39 @@ export function agodaUrl(city: string, checkin?: string, checkout?: string, gues
   return `https://www.agoda.com/search?${p}`
 }
 
+export function hotelsComUrl(city: string, checkin?: string, checkout?: string, guests = 2, rooms = 1) {
+  const p = new URLSearchParams({
+    'q-destination': city,
+    'q-rooms': String(rooms),
+    'q-room-0-adults': String(guests),
+    currency: 'INR',
+  })
+  if (checkin)  p.set('q-check-in',  checkin)
+  if (checkout) p.set('q-check-out', checkout)
+  return `https://www.hotels.com/search.do?${p}`
+}
+
+export function makemytripHotelUrl(city: string, checkin?: string, checkout?: string, guests = 2) {
+  // MMT date format: DDMMYYYY
+  function fmtMMT(d: string) {
+    const [y, m, dd] = d.split('-'); return `${dd}${m}${y}`
+  }
+  const cin  = checkin  ? fmtMMT(checkin)  : ''
+  const cout = checkout ? fmtMMT(checkout) : ''
+  const p = new URLSearchParams({ city: `CITY_${city.toUpperCase().replace(/\s/g, '_')}`, country: 'IN', searchText: city })
+  if (cin)  p.set('checkin',  cin)
+  if (cout) p.set('checkout', cout)
+  p.set('roomStayQualifier', `${guests}e0e`)
+  return `https://www.makemytrip.com/hotels/hotel-listing/#${p}`
+}
+
+export function oyoUrl(city: string, checkin?: string, checkout?: string) {
+  const p = new URLSearchParams({ location: city, source: 'web_search' })
+  if (checkin)  p.set('checkInDate',  checkin)
+  if (checkout) p.set('checkOutDate', checkout)
+  return `https://www.oyorooms.com/search/?${p}`
+}
+
 // ─── Flights ──────────────────────────────────────────────────────────────────
 export function makemytripFlightUrl(from: string, to: string, date: string, adults = 1) {
   // MMT format: /flights/domestic-results#FROM-TO-DDMMYYYY-adults-child-infants-E-0-1

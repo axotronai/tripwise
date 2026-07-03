@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
   MapPin, Sparkles, LayoutDashboard, Home, LogIn,
-  ShieldCheck, Camera, LogOut, Download, Menu, X,
+  ShieldCheck, Camera, LogOut, Download, Menu, X, Building2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
@@ -16,6 +16,7 @@ import type { User as SupabaseUser } from '@supabase/supabase-js'
 const NAV_LINKS = [
   { href: '/',            label: 'Home',       icon: Home },
   { href: '/dashboard',   label: 'My Trips',   icon: LayoutDashboard },
+  { href: '/hotels',      label: 'Hotels',     icon: Building2 },
   { href: '/activities',  label: 'Activities', icon: Camera },
 ]
 
