@@ -120,3 +120,11 @@ create policy "Users own their hotels" on public.hotels for all using (
 create policy "Users own their expenses" on public.expenses for all using (
   exists (select 1 from public.trips where id = trip_id and user_id = auth.uid())
 );
+
+-- Newsletter subscribers (server-side only — no RLS needed, admin client writes)
+create table if not exists public.newsletter_subscribers (
+  id         uuid primary key default gen_random_uuid(),
+  email      text not null unique,
+  created_at timestamptz default now()
+);
+-- No RLS: written only from server-side admin client (service role bypasses RLS)

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import fs from 'fs'
 import path from 'path'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cookies } from 'next/headers'
 import { Star, Clock, Calendar, MapPin, Sparkles, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -106,8 +107,8 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
       {/* Hero */}
       <div className={`relative bg-gradient-to-br ${dest.gradient} text-white overflow-hidden`}>
         {dest.photo && (
-          <img src={dest.photo} alt={dest.name}
-            className="absolute inset-0 w-full h-full object-cover opacity-40" />
+          <Image src={dest.photo} alt={dest.name} fill
+            className="object-cover opacity-40" sizes="100vw" priority />
         )}
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '28px 28px' }} />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

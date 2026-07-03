@@ -731,12 +731,22 @@ export default function HomePageClient() {
             <h3 className="text-xl font-bold text-gray-900 mb-1">Get Travel Deals in Your Inbox</h3>
             <p className="text-sm text-gray-500 mb-5">Weekly deals on trains, flights & hotels — curated for Indian destinations. No spam, unsubscribe anytime.</p>
             <form
-              onSubmit={e => {
+              onSubmit={async e => {
                 e.preventDefault()
                 const input = e.currentTarget.elements.namedItem('email') as HTMLInputElement
-                if (input?.value) {
+                const email = input?.value?.trim()
+                if (!email) return
+                try {
+                  const res = await fetch('/api/newsletter', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                  })
+                  if (!res.ok) throw new Error()
                   input.value = ''
                   toast.success('Thanks! Watch your inbox for deals 🎉')
+                } catch {
+                  toast.error('Could not subscribe — please try again')
                 }
               }}
               className="flex flex-col sm:flex-row gap-2 max-w-sm mx-auto"

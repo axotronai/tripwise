@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Star, ArrowRight, ChevronDown } from 'lucide-react'
 
 /* ─── Top curated destinations ─────────────────────────────────────── */
@@ -197,7 +198,8 @@ function DestCard({ name, emoji, type, days, rating, reviews, gradient, image }:
       <div className={`relative w-full aspect-square rounded-2xl overflow-hidden group cursor-pointer shadow hover:shadow-xl hover:scale-105 transition-all duration-300 ${image ? '' : `bg-gradient-to-br ${gradient}`}`}>
         {/* Photo (when provided) */}
         {image && (
-          <img src={image} alt={name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+          <Image src={image} alt={name} fill
+            className="object-cover group-hover:scale-110 transition-transform duration-500" sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw" />
         )}
         {/* Emoji placeholder (shown when no photo) */}
         {!image && (
@@ -235,7 +237,8 @@ function SpotCard({ name, desc, emoji, gradient, image }: {
     <Link href={`/destinations/${encodeURIComponent(name.toLowerCase().replace(/\s+/g, '-'))}`}>
       <div className={`relative w-full aspect-square rounded-xl overflow-hidden group cursor-pointer shadow hover:shadow-lg hover:scale-105 transition-all duration-300 ${image ? '' : `bg-gradient-to-br ${gradient}`}`}>
         {image && (
-          <img src={image} alt={name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+          <Image src={image} alt={name} fill
+            className="object-cover group-hover:scale-110 transition-transform duration-500" sizes="(max-width:640px) 50vw, (max-width:1024px) 25vw, 16vw" />
         )}
         {!image && (
           <div className="absolute inset-0 flex items-center justify-center">
