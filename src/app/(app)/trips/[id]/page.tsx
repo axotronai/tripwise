@@ -7,11 +7,15 @@ import {
   Sparkles, Train, Map, IndianRupee, Calendar, Users, Loader2,
   Share2, Hotel, CheckCircle2, Pencil, RefreshCw, X, Settings,
   Backpack, Utensils, Lightbulb, ArrowRight, UtensilsCrossed, AlertTriangle, Compass, Printer, Receipt,
+  MoreHorizontal,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import DayColumn from '@/components/trip/DayColumn'
@@ -503,20 +507,18 @@ function TripPageInner() {
             </div>
           </div>
 
-          <div className="flex gap-2 shrink-0 flex-wrap items-start">
-            <Button variant="outline" size="sm" onClick={() => setShowSettings(true)} className="gap-1.5">
-              <Settings className="h-4 w-4" /> Edit
+          {/* ── Action buttons — 2 primary CTAs always visible; rest in ⋯ on mobile ── */}
+          <div className="flex gap-2 shrink-0 items-center flex-wrap sm:flex-nowrap">
+
+            {/* Primary: Generate AI */}
+            <Button onClick={generateAI} disabled={aiLoading}
+              className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md h-9">
+              {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              <span className="hidden xs:inline">{aiLoading ? 'Generating…' : pct > 0 ? 'Regenerate' : 'Generate AI'}</span>
+              <span className="xs:hidden text-xs">{aiLoading ? '…' : 'AI'}</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={shareTrip} className="gap-1.5">
-              <Share2 className="h-4 w-4" /> Share
-            </Button>
-            <a
-              href={`/trips/${id}/print`}
-              target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-300 transition-colors h-9"
-            >
-              <Printer className="h-4 w-4" /> <span className="hidden sm:inline">Export PDF</span>
-            </a>
+
+            {/* Primary: Plan Wizard */}
             <Button
               onClick={() => setShowWizard(true)}
               className="gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md h-9 font-semibold"
@@ -524,23 +526,58 @@ function TripPageInner() {
               🗺️ <span className="hidden sm:inline">Plan Step by Step</span>
               <span className="sm:hidden text-xs">Plan</span>
             </Button>
-            <a href={`https://wa.me/?text=${encodeURIComponent(`Check my ${currentTrip.total_days}-day trip to ${currentTrip.destination} on TripWise! ${window.location.href}`)}`}
-              target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-green-50 hover:text-green-700 hover:border-green-300 transition-colors h-9">
-              💬 WhatsApp
-            </a>
-            <a
-              href={`/packing-list?destination=${encodeURIComponent(currentTrip.destination)}&days=${currentTrip.total_days}&start_date=${currentTrip.start_date}&style=${currentTrip.travel_style}&group=${currentTrip.group_size}`}
-              target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 transition-colors h-9"
-            >
-              <Backpack className="h-4 w-4" /> <span className="hidden sm:inline">Packing List</span>
-            </a>
-            <Button onClick={generateAI} disabled={aiLoading}
-              className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md h-9">
-              {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-              {aiLoading ? 'Generating…' : pct > 0 ? 'Regenerate AI' : 'Generate with AI'}
-            </Button>
+
+            {/* Secondary actions — visible on sm+, collapsed into ⋯ on mobile */}
+            <div className="hidden sm:flex gap-2 items-center">
+              <Button variant="outline" size="sm" onClick={() => setShowSettings(true)} className="gap-1.5 h-9">
+                <Settings className="h-4 w-4" /> Edit
+              </Button>
+              <Button variant="outline" size="sm" onClick={shareTrip} className="gap-1.5 h-9">
+                <Share2 className="h-4 w-4" /> Share
+              </Button>
+              <a href={`/trips/${id}/print`} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-300 transition-colors h-9">
+                <Printer className="h-4 w-4" /> Export PDF
+              </a>
+              <a href={`https://wa.me/?text=${encodeURIComponent(`Check my ${currentTrip.total_days}-day trip to ${currentTrip.destination} on TripWise! ${window.location.href}`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-green-50 hover:text-green-700 hover:border-green-300 transition-colors h-9">
+                💬 WhatsApp
+              </a>
+              <a href={`/packing-list?destination=${encodeURIComponent(currentTrip.destination)}&days=${currentTrip.total_days}&start_date=${currentTrip.start_date}&style=${currentTrip.travel_style}&group=${currentTrip.group_size}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 transition-colors h-9">
+                <Backpack className="h-4 w-4" /> Packing List
+              </a>
+            </div>
+
+            {/* ⋯ overflow menu — mobile only */}
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className="sm:hidden inline-flex items-center justify-center h-9 w-9 rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                aria-label="More actions"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => setShowSettings(true)}>
+                  <Settings className="h-4 w-4" /> Edit Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={shareTrip}>
+                  <Share2 className="h-4 w-4" /> Copy Link
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => window.open(`/trips/${id}/print`, '_blank', 'noopener,noreferrer')}>
+                  <Printer className="h-4 w-4" /> Export PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Check my ${currentTrip.total_days}-day trip to ${currentTrip.destination} on TripWise! ${window.location.href}`)}`, '_blank', 'noopener,noreferrer')}>
+                  <span>💬</span> Share on WhatsApp
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => window.open(`/packing-list?destination=${encodeURIComponent(currentTrip.destination)}&days=${currentTrip.total_days}&start_date=${currentTrip.start_date}&style=${currentTrip.travel_style}&group=${currentTrip.group_size}`, '_blank', 'noopener,noreferrer')}>
+                  <Backpack className="h-4 w-4" /> Packing List
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
           </div>
         </div>
       </div>
@@ -588,17 +625,17 @@ function TripPageInner() {
 
       {/* Main Tabs */}
       <Tabs defaultValue="itinerary">
-        <TabsList className="bg-white border shadow-sm w-full sm:w-auto flex overflow-x-auto">
-          <TabsTrigger value="itinerary"  className="gap-1.5 text-xs sm:text-sm"><Calendar    className="h-4 w-4" /><span className="hidden sm:inline">Itinerary</span></TabsTrigger>
-          <TabsTrigger value="map"        className="gap-1.5 text-xs sm:text-sm"><Map         className="h-4 w-4" /><span className="hidden sm:inline">Map</span></TabsTrigger>
-          <TabsTrigger value="transport"  className="gap-1.5 text-xs sm:text-sm"><Train       className="h-4 w-4" /><span className="hidden sm:inline">Transport</span></TabsTrigger>
-          <TabsTrigger value="hotels"     className="gap-1.5 text-xs sm:text-sm"><Hotel       className="h-4 w-4" /><span className="hidden sm:inline">Hotels</span></TabsTrigger>
-          <TabsTrigger value="restaurants" className="gap-1.5 text-xs sm:text-sm"><UtensilsCrossed className="h-4 w-4" /><span className="hidden sm:inline">Restaurants</span></TabsTrigger>
-          <TabsTrigger value="places"     className="gap-1.5 text-xs sm:text-sm"><Compass className="h-4 w-4" /><span className="hidden sm:inline">Places</span></TabsTrigger>
-          <TabsTrigger value="budget"     className="gap-1.5 text-xs sm:text-sm"><IndianRupee className="h-4 w-4" /><span className="hidden sm:inline">Budget</span></TabsTrigger>
-          <TabsTrigger value="expenses"   className="gap-1.5 text-xs sm:text-sm"><Receipt     className="h-4 w-4" /><span className="hidden sm:inline">Expenses</span></TabsTrigger>
+        <TabsList className="bg-white border shadow-sm w-full flex overflow-x-auto scrollbar-hide gap-0">
+          <TabsTrigger value="itinerary"   className="flex-col gap-0.5 py-2 px-2.5 sm:flex-row sm:gap-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-sm shrink-0"><Calendar        className="h-4 w-4 sm:h-4 sm:w-4" /><span>Itinerary</span></TabsTrigger>
+          <TabsTrigger value="map"         className="flex-col gap-0.5 py-2 px-2.5 sm:flex-row sm:gap-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-sm shrink-0"><Map             className="h-4 w-4" /><span>Map</span></TabsTrigger>
+          <TabsTrigger value="transport"   className="flex-col gap-0.5 py-2 px-2.5 sm:flex-row sm:gap-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-sm shrink-0"><Train           className="h-4 w-4" /><span>Transport</span></TabsTrigger>
+          <TabsTrigger value="hotels"      className="flex-col gap-0.5 py-2 px-2.5 sm:flex-row sm:gap-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-sm shrink-0"><Hotel           className="h-4 w-4" /><span>Hotels</span></TabsTrigger>
+          <TabsTrigger value="restaurants" className="flex-col gap-0.5 py-2 px-2.5 sm:flex-row sm:gap-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-sm shrink-0"><UtensilsCrossed className="h-4 w-4" /><span>Food</span></TabsTrigger>
+          <TabsTrigger value="places"      className="flex-col gap-0.5 py-2 px-2.5 sm:flex-row sm:gap-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-sm shrink-0"><Compass         className="h-4 w-4" /><span>Places</span></TabsTrigger>
+          <TabsTrigger value="budget"      className="flex-col gap-0.5 py-2 px-2.5 sm:flex-row sm:gap-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-sm shrink-0"><IndianRupee     className="h-4 w-4" /><span>Budget</span></TabsTrigger>
+          <TabsTrigger value="expenses"    className="flex-col gap-0.5 py-2 px-2.5 sm:flex-row sm:gap-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-sm shrink-0"><Receipt         className="h-4 w-4" /><span>Expenses</span></TabsTrigger>
           {hasInsights && (
-            <TabsTrigger value="insights" className="gap-1.5 text-xs sm:text-sm"><Sparkles className="h-4 w-4" /><span className="hidden sm:inline">AI Insights</span></TabsTrigger>
+            <TabsTrigger value="insights"  className="flex-col gap-0.5 py-2 px-2.5 sm:flex-row sm:gap-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-sm shrink-0"><Sparkles        className="h-4 w-4" /><span>Insights</span></TabsTrigger>
           )}
         </TabsList>
 
