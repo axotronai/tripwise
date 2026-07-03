@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server-admin'
 import { requireTripOwner } from '@/lib/supabase/auth-guard'
+import { UpdateTripSchema, parseBody, checkOrigin } from '@/lib/api/trip-schema'
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -30,33 +31,41 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // ── CSRF origin check ──────────────────────────────────────────────────────
+  const originCheck = checkOrigin(req)
+  if (originCheck !== true) return originCheck
+
   const { id } = await params
 
   const guard = await requireTripOwner(id)
   if (guard.error) return guard.error
 
-  const admin = createAdminClient()
+  // ── Validate + parse body with Zod ─────────────────────────────────────────
+  const { data: body, error: validationError } = await parseBody(req, UpdateTripSchema)
+  if (validationError) return validationError
 
-  const body = await req.json()
-  const allowed = ['total_budget', 'travel_style', 'group_size', 'children', 'title', 'ai_insights']
-  const update: Record<string, unknown> = {}
-  for (const key of allowed) {
-    if (body[key] !== undefined) update[key] = body[key]
-  }
+  const admin = createAdminClient()
 
   const { data, error } = await admin
     .from('trips')
-    .update(update)
+    .update(body)
     .eq('id', id)
     .eq('user_id', guard.userId) // belt-and-suspenders: re-assert ownership at DB level
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[trips/PATCH] DB error:', error.code, error.message)
+    return NextResponse.json({ error: 'Failed to update trip' }, { status: 500 })
+  }
   return NextResponse.json(data)
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // ── CSRF origin check ──────────────────────────────────────────────────────
+  const originCheck = checkOrigin(req)
+  if (originCheck !== true) return originCheck
+
   const { id } = await params
 
   const guard = await requireTripOwner(id)
@@ -69,6 +78,9 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
     .eq('id', id)
     .eq('user_id', guard.userId) // belt-and-suspenders: re-assert ownership at DB level
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[trips/DELETE] DB error:', error.code, error.message)
+    return NextResponse.json({ error: 'Failed to delete trip' }, { status: 500 })
+  }
   return NextResponse.json({ success: true })
 }

@@ -3,12 +3,12 @@ import Groq from 'groq-sdk'
 import { getSeasonNote } from '@/lib/ai/season'
 import { getFestivalNote } from '@/lib/ai/festivals'
 import { ANTI_HALLUCINATION_RESTAURANTS, JSON_OUTPUT_RULE } from '@/lib/ai/prompts'
-import { aiGuard } from '@/lib/ai/guard'
+import { aiGuard, logTokenUsage } from '@/lib/ai/guard'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
 
 export async function POST(req: NextRequest) {
-  const { error } = await aiGuard(req)
+  const { userId, error } = await aiGuard(req)
   if (error) return error
 
   const { destination, diet, cuisine, budget_range, start_date } = await req.json()
@@ -83,6 +83,7 @@ Return JSON:
         max_tokens: 2000,
         response_format: { type: 'json_object' },
       })
+      logTokenUsage(userId, 'find-restaurants', completion.usage)
       const data = JSON.parse(completion.choices[0].message.content || '{}')
       if (data.restaurants?.length) {
         // Server-side diet enforcement: filter violators rather than silently pass them

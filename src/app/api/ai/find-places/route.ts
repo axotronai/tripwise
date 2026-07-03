@@ -3,12 +3,12 @@ import Groq from 'groq-sdk'
 import { getSeasonNote } from '@/lib/ai/season'
 import { getFestivalNote } from '@/lib/ai/festivals'
 import { ANTI_HALLUCINATION_PLACES, JSON_OUTPUT_RULE } from '@/lib/ai/prompts'
-import { aiGuard } from '@/lib/ai/guard'
+import { aiGuard, logTokenUsage } from '@/lib/ai/guard'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
 
 export async function POST(req: NextRequest) {
-  const { error } = await aiGuard(req)
+  const { userId, error } = await aiGuard(req)
   if (error) return error
 
   const { city, destination, travel_style, start_date, category, exclude = [] } = await req.json()
@@ -90,6 +90,7 @@ MUST VISIT RULE: Exactly 5 of the 8 places must have is_must_visit: true — the
         max_tokens: 2500,
         response_format: { type: 'json_object' },
       })
+      logTokenUsage(userId, 'find-places', completion.usage)
       const data = JSON.parse(completion.choices[0].message.content || '{}')
       if (data.places?.length) {
         // Server-side dedup against exclude list (loose match)

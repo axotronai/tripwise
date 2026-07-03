@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
 import { getSeasonNote } from '@/lib/ai/season'
 import { styleGuide, dietGuide, ANTI_HALLUCINATION_PLACES, JSON_OUTPUT_RULE } from '@/lib/ai/prompts'
-import { aiGuard } from '@/lib/ai/guard'
+import { aiGuard, logTokenUsage } from '@/lib/ai/guard'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
 
 export async function POST(req: NextRequest) {
-  const { error } = await aiGuard(req)
+  const { userId, error } = await aiGuard(req)
   if (error) return error
 
   const { destination, city, day_number, current_activities, start_date, budget, travel_style, diet = 'any', total_days = 1 } = await req.json()
@@ -80,6 +80,7 @@ Types allowed: sightseeing, food, adventure, culture, beach, shopping, rest, nat
         max_tokens: 2000,
         response_format: { type: 'json_object' },
       })
+      logTokenUsage(userId, 'refine-day', completion.usage)
       const data = JSON.parse(completion.choices[0].message.content || '{}')
       if (!data.activities?.length) throw new Error('empty')
 

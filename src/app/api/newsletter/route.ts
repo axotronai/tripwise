@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server-admin'
 
 export async function POST(req: NextRequest) {
-  const { email } = await req.json()
+  const body = await req.json()
+  const { email, website } = body
+
+  // ── Honeypot — bots fill hidden fields, real users don't ──────────────────
+  // Return 200 silently so scrapers can't detect the check
+  if (website) return NextResponse.json({ ok: true })
 
   // Basic validation
   if (!email || typeof email !== 'string') {

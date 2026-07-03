@@ -8,12 +8,12 @@ import {
   ANTI_HALLUCINATION_RESTAURANTS, ANTI_HALLUCINATION_TRAINS,
   JSON_OUTPUT_RULE,
 } from '@/lib/ai/prompts'
-import { aiGuard } from '@/lib/ai/guard'
+import { aiGuard, logTokenUsage } from '@/lib/ai/guard'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
 
 export async function POST(req: NextRequest) {
-  const { error } = await aiGuard(req)
+  const { userId, error } = await aiGuard(req)
   if (error) return error
 
   const {
@@ -160,6 +160,7 @@ Return JSON:
         response_format: { type: 'json_object' },
       })
 
+      logTokenUsage(userId, 'itinerary', completion.usage)
       const content   = completion.choices[0].message.content || '{}'
       const itinerary = JSON.parse(content)
 

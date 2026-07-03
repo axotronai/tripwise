@@ -3,12 +3,12 @@ import Groq from 'groq-sdk'
 import { getSeasonNote } from '@/lib/ai/season'
 import { getFestivalNote } from '@/lib/ai/festivals'
 import { JSON_OUTPUT_RULE } from '@/lib/ai/prompts'
-import { aiGuard } from '@/lib/ai/guard'
+import { aiGuard, logTokenUsage } from '@/lib/ai/guard'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
 
 export async function POST(req: NextRequest) {
-  const { error } = await aiGuard(req)
+  const { userId, error } = await aiGuard(req)
   if (error) return error
 
   const { destination, days, tripType, season, travelers, start_date } = await req.json()
@@ -64,6 +64,7 @@ Return this JSON schema (use the exact category names + emojis):
         response_format: { type: 'json_object' },
       })
 
+      logTokenUsage(userId, 'packing-list', completion.usage)
       const data = JSON.parse(completion.choices[0].message.content || '{}')
       if (!data.categories?.length) throw new Error('empty response')
       return NextResponse.json(data)

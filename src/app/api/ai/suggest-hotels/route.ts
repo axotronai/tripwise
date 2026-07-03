@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
 import { ANTI_HALLUCINATION_HOTELS, JSON_OUTPUT_RULE } from '@/lib/ai/prompts'
-import { aiGuard } from '@/lib/ai/guard'
+import { aiGuard, logTokenUsage } from '@/lib/ai/guard'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY }) }
 
@@ -10,7 +10,7 @@ function buildMapUrl(name: string, city: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { error } = await aiGuard(req)
+  const { userId, error } = await aiGuard(req)
   if (error) return error
 
   const { city, checkin, checkout, nights, guests = 1, travel_style = 'comfort', budget_per_night = 3000 } = await req.json()
@@ -76,6 +76,7 @@ Return JSON:
         max_tokens: 1500,
         response_format: { type: 'json_object' },
       })
+      logTokenUsage(userId, 'suggest-hotels', completion.usage)
       const data = JSON.parse(completion.choices[0].message.content || '{}')
       if (data.hotels?.length) {
         // Add map_url server-side (never let model generate URLs — it returns placeholders)

@@ -9,7 +9,7 @@ import {
   ANTI_HALLUCINATION_RESTAURANTS, ANTI_HALLUCINATION_TRAINS,
   JSON_OUTPUT_RULE,
 } from '@/lib/ai/prompts'
-import { aiGuard } from '@/lib/ai/guard'
+import { aiGuard, logTokenUsage } from '@/lib/ai/guard'
 
 function getGroq() {
   return new Groq({ apiKey: process.env.GROQ_API_KEY })
@@ -84,7 +84,7 @@ function buildSchemaExample(
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  const { error } = await aiGuard(req)
+  const { userId, error } = await aiGuard(req)
   if (error) return error
 
   const body = (await req.json()) as FullPlanRequest
@@ -250,6 +250,7 @@ Generate the complete ${total_days}-day plan now.`
         response_format: { type: 'json_object' },
       })
 
+      logTokenUsage(userId, 'full-plan', completion.usage)
       const content = completion.choices[0].message.content || '{}'
       const plan = JSON.parse(content)
 

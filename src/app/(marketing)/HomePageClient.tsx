@@ -737,10 +737,11 @@ export default function HomePageClient() {
                 const email = input?.value?.trim()
                 if (!email) return
                 try {
+                  const honeypot = (e.currentTarget.elements.namedItem('website') as HTMLInputElement)?.value
                   const res = await fetch('/api/newsletter', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email }),
+                    body: JSON.stringify({ email, website: honeypot }),
                   })
                   if (!res.ok) throw new Error()
                   input.value = ''
@@ -751,6 +752,8 @@ export default function HomePageClient() {
               }}
               className="flex flex-col sm:flex-row gap-2 max-w-sm mx-auto"
             >
+              {/* Honeypot — hidden from real users, bots fill it in */}
+              <input name="website" type="text" tabIndex={-1} aria-hidden="true" autoComplete="off" className="sr-only" />
               <Input name="email" type="email" placeholder="your@email.com" required className="flex-1 h-11 border-blue-200 focus-visible:ring-blue-400" />
               <Button type="submit" className="h-11 px-5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shrink-0">
                 Subscribe

@@ -26,6 +26,10 @@ const nextConfig: NextConfig = {
         headers: [
           // Prevent clickjacking
           { key: 'X-Frame-Options',        value: 'SAMEORIGIN' },
+          // Isolate browsing context (prevents Spectre-class side-channel attacks)
+          { key: 'Cross-Origin-Opener-Policy',   value: 'same-origin' },
+          // Restrict cross-origin resource sharing
+          { key: 'Cross-Origin-Resource-Policy', value: 'same-site' },
           // Stop MIME-type sniffing
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           // Enable browser XSS filter (legacy browsers)
