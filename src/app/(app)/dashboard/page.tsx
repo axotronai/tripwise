@@ -8,6 +8,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Trip } from '@/types'
 import { formatINR } from '@/lib/utils/trip'
 import { format, isPast, isFuture, isToday } from 'date-fns'
@@ -51,6 +56,8 @@ export default function DashboardPage() {
   const [fetchError, setFetchError] = useState(false)
   const [duplicating, setDuplicating] = useState<string | null>(null)
   const [showAll, setShowAll]   = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const PAGE_SIZE = 9
 
   useEffect(() => {
@@ -65,11 +72,19 @@ export default function DashboardPage() {
       .finally(() => setLoading(false))
   }, [router])
 
-  async function deleteTrip(id: string, title: string) {
-    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return
-    await fetch(`/api/trips/${id}`, { method: 'DELETE' })
-    setTrips(prev => prev.filter(t => t.id !== id))
-    toast.success('Trip deleted')
+  async function confirmDelete() {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      await fetch(`/api/trips/${deleteTarget.id}`, { method: 'DELETE' })
+      setTrips(prev => prev.filter(t => t.id !== deleteTarget.id))
+      toast.success('Trip deleted')
+    } catch {
+      toast.error('Could not delete trip — try again')
+    } finally {
+      setDeleting(false)
+      setDeleteTarget(null)
+    }
   }
 
   async function duplicateTrip(id: string) {
@@ -248,8 +263,12 @@ export default function DashboardPage() {
                         ? <Loader2 className="h-4 w-4 animate-spin" />
                         : <Copy className="h-4 w-4" />}
                     </Button>
-                    <Button variant="ghost" size="sm" className="px-2 text-red-400 hover:text-red-600 hover:bg-red-50"
-                      onClick={() => deleteTrip(trip.id, trip.title)}>
+                    <Button
+                      variant="ghost" size="sm"
+                      className="px-2 text-red-400 hover:text-red-600 hover:bg-red-50"
+                      aria-label="Delete trip"
+                      onClick={() => setDeleteTarget({ id: trip.id, title: trip.title })}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -271,6 +290,31 @@ export default function DashboardPage() {
           </button>
         </div>
       )}
+
+      {/* ── Delete confirmation dialog ─────────────────────────────── */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={open => { if (!open) setDeleteTarget(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this trip?</AlertDialogTitle>
+            <AlertDialogDescription>
+              <span className="font-semibold text-gray-800">&ldquo;{deleteTarget?.title}&rdquo;</span> and all
+              its days, activities, and expenses will be permanently deleted.
+              This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {deleting ? 'Deleting…' : 'Yes, delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   )
 }
