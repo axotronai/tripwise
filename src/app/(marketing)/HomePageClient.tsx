@@ -137,7 +137,9 @@ export default function HomePageClient() {
       const city     = htCity     || 'Goa'
       const checkin  = htCheckin  || new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0]
       const checkout = htCheckout || new Date(Date.now() + 9*24*60*60*1000).toISOString().split('T')[0]
-      window.open(bookingComUrl(city + ' India', checkin, checkout, parseInt(htGuests) || 2), '_blank', 'noopener,noreferrer')
+      const guests   = htGuests   || '2'
+      const p = new URLSearchParams({ city, checkin, checkout, adults: guests, autosearch: '1' })
+      router.push(`/hotels?${p.toString()}`)
 
     } else if (tab === 'trains') {
       const params = new URLSearchParams()
@@ -353,7 +355,7 @@ export default function HomePageClient() {
                         value={htGuests} onChange={e => setHtGuests(e.target.value)} />
                     </div>
                     <Button onClick={goSearch} className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold gap-2">
-                      🏨 Search on Booking.com
+                      🏨 Compare Hotel Prices
                     </Button>
                   </div>
                   <p className="text-center text-xs text-gray-400 mt-1">

@@ -5,6 +5,7 @@ import { Building2, TrendingDown, Star, Shield, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 // Lazy-load the heavy comparison component
 const HotelComparison = dynamic(() => import('@/components/hotel/HotelComparison'), {
@@ -43,6 +44,29 @@ const WHY_US = [
     desc:  'Compare 5 booking sites simultaneously — no switching tabs, no wasted time.',
   },
 ]
+
+function HotelsInner() {
+  const sp         = useSearchParams()
+  const city       = sp.get('city')     ?? ''
+  const checkin    = sp.get('checkin')  ?? ''
+  const checkout   = sp.get('checkout') ?? ''
+  const adults     = parseInt(sp.get('adults') ?? '2')
+  const autosearch = sp.get('autosearch') === '1'
+
+  return (
+    <section id="search" className="max-w-4xl mx-auto px-4 py-10">
+      <Suspense>
+        <HotelComparison
+          defaultCity={city}
+          defaultCheckin={checkin}
+          defaultCheckout={checkout}
+          defaultAdults={adults}
+          autoSearch={autosearch}
+        />
+      </Suspense>
+    </section>
+  )
+}
 
 export default function HotelsClient() {
   return (
@@ -84,11 +108,9 @@ export default function HotelsClient() {
       </section>
 
       {/* ── Comparison widget ────────────────────────────────────────────────── */}
-      <section id="search" className="max-w-4xl mx-auto px-4 py-10">
-        <Suspense>
-          <HotelComparison />
-        </Suspense>
-      </section>
+      <Suspense>
+        <HotelsInner />
+      </Suspense>
 
       {/* ── Why use TripWise ─────────────────────────────────────────────────── */}
       <section className="bg-white border-t border-gray-100 py-14 px-4">

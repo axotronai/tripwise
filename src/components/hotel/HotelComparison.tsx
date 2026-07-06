@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Star, MapPin, Wifi, Waves, Coffee, UtensilsCrossed,
   Dumbbell, Car, Sparkles, ArrowUpDown, SlidersHorizontal,
@@ -205,22 +205,32 @@ function HotelCard({ hotel, nights }: { hotel: ComparedHotel; nights: number }) 
 // ─── Main component ───────────────────────────────────────────────────────────
 
 interface Props {
-  defaultCity?:    string
-  defaultCheckin?: string
+  defaultCity?:     string
+  defaultCheckin?:  string
   defaultCheckout?: string
-  defaultAdults?:  number
+  defaultAdults?:   number
+  autoSearch?:      boolean
 }
 
 export default function HotelComparison({
-  defaultCity    = '',
-  defaultCheckin = '',
+  defaultCity     = '',
+  defaultCheckin  = '',
   defaultCheckout = '',
-  defaultAdults  = 2,
+  defaultAdults   = 2,
+  autoSearch      = false,
 }: Props) {
   const [city,     setCity]     = useState(defaultCity)
   const [checkin,  setCheckin]  = useState(defaultCheckin)
   const [checkout, setCheckout] = useState(defaultCheckout)
   const [adults,   setAdults]   = useState(defaultAdults)
+
+  // Auto-search when arriving from homepage with pre-filled params
+  useEffect(() => {
+    if (autoSearch && defaultCity && defaultCheckin && defaultCheckout) {
+      search()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [type,     setType]     = useState('all')
   const [maxPrice, setMaxPrice] = useState(20000)
   const [sort,     setSort]     = useState<SortKey>('cheapest')
